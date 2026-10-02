@@ -24,3 +24,5 @@ Thumbs.db
 
 # Airflow
 /airflow/simple_auth_manager_passwords.json
+
+data/incoming/*.csv
