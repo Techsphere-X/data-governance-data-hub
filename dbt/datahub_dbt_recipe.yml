@@ -1,8 +1,8 @@
 source:
   type: dbt
   config:
-    manifest_path: /home/ineii/data-governance-data-hub/dbt/target/manifest.json
-    catalog_path: /home/ineii/data-governance-data-hub/dbt/target/catalog.json
+    manifest_path: ./dbt/target/manifest.json
+    catalog_path: ./dbt/target/catalog.json
     target_platform: postgres
     stateful_ingestion:
       enabled: false

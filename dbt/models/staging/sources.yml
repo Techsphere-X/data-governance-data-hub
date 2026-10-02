@@ -27,3 +27,12 @@ sources:
       - name: olist_order_payments
         description: "Raw order payment records containing payment type and value."
 
+
+  - name: raw_shipment_csv
+    schema: raw_shipment_csv
+    description: "Raw supplier shipment data loaded from CSV files through Airbyte."
+
+    tables:
+
+      - name: supplier_shipments
+        description: "Raw supplier shipment records containing shipment, supplier, product, quantity, delivery, and status information."

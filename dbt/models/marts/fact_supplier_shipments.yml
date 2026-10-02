@@ -1,0 +1,104 @@
+
+version: 2
+
+models:
+
+  - name: fact_supplier_shipments
+    description: "Supplier shipment fact table containing one row per supplier shipment and delivery performance metrics."
+
+    meta:
+      metrics:
+        total_shipments:
+          type: count
+          description: "Total number of supplier shipments."
+
+        total_quantity:
+          type: sum
+          sql: ${TABLE}.quantity
+          description: "Total number of product units shipped."
+
+        delivered_shipments:
+          type: count
+          sql: |
+            CASE
+              WHEN ${TABLE}.is_delivered = true THEN ${TABLE}.shipment_id
+            END
+          description: "Total number of supplier shipments that have been delivered."
+
+        delayed_shipments:
+          type: count
+          sql: |
+            CASE
+              WHEN ${TABLE}.is_delayed = true THEN ${TABLE}.shipment_id
+            END
+          description: "Total number of supplier shipments identified as delayed."
+
+    columns:
+
+      - name: shipment_id
+        description: "Unique identifier for the supplier shipment."
+        tests:
+          - not_null
+          - unique
+
+      - name: product_id
+        description: "Identifier of the Olist product associated with the shipment."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+
+      - name: supplier_id
+        description: "Identifier of the supplier responsible for the shipment."
+        tests:
+          - not_null
+
+      - name: shipment_date
+        description: "Date the supplier shipment was sent."
+
+      - name: quantity
+        description: "Number of product units included in the shipment."
+        tests:
+          - not_null
+
+      - name: expected_delivery_date
+        description: "Expected date the shipment should be delivered."
+
+      - name: actual_delivery_date
+        description: "Actual delivery date. Null when the shipment has not yet been delivered."
+
+      - name: shipment_status
+        description: "Current supplier shipment status."
+        tests:
+          - accepted_values:
+              values: ['Pending', 'In Transit', 'Delivered', 'Delayed']
+
+      - name: delivery_days
+        description: "Number of days between shipment date and actual delivery date."
+
+      - name: delay_days
+        description: "Number of days the shipment was delivered after the expected delivery date."
+
+      - name: is_delivered
+        description: "Indicates whether the shipment has an actual delivery date."
+
+      - name: is_status_delayed
+        description: "Indicates whether the source shipment status is Delayed."
+
+      - name: is_date_delayed
+        description: "Indicates whether the actual delivery date was later than the expected delivery date."
+
+      - name: is_delayed
+        description: "Indicates whether the shipment is marked delayed by the source or the delivery dates indicate a delay."
+
+      - name: is_on_time
+        description: "Indicates whether the shipment was delivered on or before its expected delivery date."
+
+      - name: product_category_name
+        description: "Product category associated with the shipped product."
+
+      - name: updated_at
+        description: "Timestamp when the supplier shipment record was last updated."
+

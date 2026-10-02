@@ -9,12 +9,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# PostgreSQL connection settings
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "olist_raw")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+# PostgreSQL connection settings for supplier shipment generation
+SUPPLIER_DB_HOST = os.getenv("SUPPLIER_DB_HOST", "localhost")
+SUPPLIER_DB_PORT = os.getenv("SUPPLIER_DB_PORT", "5432")
+SUPPLIER_DB_NAME = os.getenv("SUPPLIER_DB_NAME", "governance")
+SUPPLIER_DB_USER = os.getenv("SUPPLIER_DB_USER", "governance")
+SUPPLIER_DB_PASSWORD = os.getenv("SUPPLIER_DB_PASSWORD")
 
 # MinIO settings
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://localhost:9100")
@@ -38,11 +38,11 @@ def get_product_ids():
     """Get real product IDs from PostgreSQL."""
 
     connection = psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
+        host=SUPPLIER_DB_HOST,
+        port=SUPPLIER_DB_PORT,
+        database=SUPPLIER_DB_NAME,
+        user=SUPPLIER_DB_USER,
+        password=SUPPLIER_DB_PASSWORD,
     )
 
     cursor = connection.cursor()
@@ -194,7 +194,7 @@ def upload_to_minio(filepath):
 def main():
     print("Connecting to PostgreSQL...")
 
-    if not DB_PASSWORD:
+    if not SUPPLIER_DB_PASSWORD:
         raise ValueError(
             "DB_PASSWORD is not set. "
             "Set it before running the script."
