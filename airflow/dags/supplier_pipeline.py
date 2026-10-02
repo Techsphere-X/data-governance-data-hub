@@ -1,4 +1,3 @@
-
 from airflow.sdk import dag, task
 from datetime import datetime
 import os
@@ -13,7 +12,7 @@ import glob
     start_date=datetime(2026, 1, 1),
     schedule=None,
     catchup=False,
-    tags=["supplier", "airbyte"],
+    tags=["supplier", "airbyte", "dbt"],
 )
 def supplier_shipment_pipeline():
 
@@ -39,7 +38,6 @@ def supplier_shipment_pipeline():
                 f"{result.returncode}"
             )
 
-        # Confirm that the CSV was created in the shared project folder
         csv_files = glob.glob("/opt/airflow/data/incoming/shipments_*.csv")
 
         if not csv_files:
@@ -59,7 +57,6 @@ def supplier_shipment_pipeline():
         client_id = os.environ["AIRBYTE_CLIENT_ID"]
         client_secret = os.environ["AIRBYTE_CLIENT_SECRET"]
 
-        # Get Airbyte access token
         token_response = requests.post(
             f"{airbyte_url}/api/public/v1/applications/token",
             json={
@@ -73,7 +70,6 @@ def supplier_shipment_pipeline():
         token_response.raise_for_status()
         token = token_response.json()["access_token"]
 
-        # Start Airbyte sync
         response = requests.post(
             f"{airbyte_url}/api/public/v1/jobs",
             headers={"Authorization": f"Bearer {token}"},
@@ -90,11 +86,9 @@ def supplier_shipment_pipeline():
 
         print(f"Supplier Airbyte sync started. Job ID: {job_id}")
 
-        # Wait for Airbyte to finish
         while True:
             time.sleep(15)
 
-            # Get a fresh Airbyte access token
             token_response = requests.post(
                 f"{airbyte_url}/api/public/v1/applications/token",
                 json={
@@ -108,7 +102,6 @@ def supplier_shipment_pipeline():
             token_response.raise_for_status()
             token = token_response.json()["access_token"]
 
-            # Check Airbyte job status
             status_response = requests.get(
                 f"{airbyte_url}/api/public/v1/jobs/{job_id}",
                 headers={"Authorization": f"Bearer {token}"},
@@ -127,14 +120,53 @@ def supplier_shipment_pipeline():
                 return
 
             if status in ["failed", "cancelled", "incomplete"]:
-                raise Exception(
-                    f"Airbyte sync failed. "
-                    f"Job {job_id} status: {status}"
-                )
+                raise Exception(f"Airbyte sync failed. Job {job_id} status: {status}")
 
+    @task
+    def run_dbt_build():
+        print("========================================")
+        print("STARTING DBT BUILD")
+        print("========================================")
 
-    generate_shipments() >> sync_with_airbyte()
+        dbt_command = [
+            "docker",
+            "exec",
+            "data-governance-dbt",
+            "dbt",
+            "build",
+        ]
+
+        print(f"Running command: {' '.join(dbt_command)}")
+
+        result = subprocess.run(
+            dbt_command,
+            capture_output=True,
+            text=True,
+        )
+
+        print("========================================")
+        print("DBT OUTPUT")
+        print("========================================")
+        print(result.stdout)
+
+        if result.stderr:
+            print("========================================")
+            print("DBT STDERR")
+            print("========================================")
+            print(result.stderr)
+
+        print("========================================")
+        print(f"DBT RETURN CODE: {result.returncode}")
+        print("========================================")
+
+        if result.returncode != 0:
+            raise Exception(f"dbt build failed with exit code {result.returncode}")
+
+        print("========================================")
+        print("DBT BUILD COMPLETED SUCCESSFULLY")
+        print("========================================")
+
+    generate_shipments() >> sync_with_airbyte() >> run_dbt_build()
 
 
 supplier_shipment_pipeline()
-

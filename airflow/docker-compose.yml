@@ -46,8 +46,9 @@ x-airflow-common:
     - ./simple_auth_manager_passwords.json:/opt/airflow/simple_auth_manager_passwords.json
     - ../simulation:/opt/airflow/simulation
     - ../data:/opt/airflow/data
+    - /var/run/docker.sock:/var/run/docker.sock
 
-  user: "${AIRFLOW_UID:-50000}:0"
+  user: "${AIRFLOW_UID:-50000}:1001"
 
   depends_on:
     airflow-postgres:
