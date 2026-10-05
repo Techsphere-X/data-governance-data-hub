@@ -1,15 +1,15 @@
-
 from airflow.sdk import dag, task
 from datetime import datetime
 import requests
 import os
 import time
+import subprocess
 
 
 @dag(
     dag_id="olist_data_pipeline",
     start_date=datetime(2026, 1, 1),
-    schedule=None,          # Manual trigger only
+    schedule=None,
     catchup=False,
     tags=["olist", "airbyte", "dbt", "datahub"],
 )
@@ -94,35 +94,81 @@ def olist_data_pipeline():
             job = response.json()
             status = job["status"]
 
-            print(
-                f"Olist Airbyte job {job_id} status: {status}"
-            )
+            print(f"Olist Airbyte job {job_id} status: {status}")
 
-            # Successful sync
             if status == "succeeded":
-                print(
-                    "Olist Airbyte sync completed successfully."
-                )
+                print("Olist Airbyte sync completed successfully.")
                 return
 
-            # Failed sync
             if status in [
                 "failed",
                 "cancelled",
                 "incomplete",
             ]:
                 raise Exception(
-                    f"Olist Airbyte sync failed. "
-                    f"Job {job_id} status: {status}"
+                    f"Olist Airbyte sync failed. " f"Job {job_id} status: {status}"
                 )
+
+    @task
+    def run_dbt_build():
+        print("========================================")
+        print("STARTING OLIST DBT BUILD")
+        print("========================================")
+
+        dbt_command = [
+            "docker",
+            "exec",
+            "data-governance-dbt",
+            "dbt",
+            "build",
+            "--select",
+            "staging.* intermediate.* marts.*",
+            "--exclude",
+            "staging.stg_supplier_shipments "
+            "intermediate.int_supplier_shipments "
+            "marts.fact_supplier_shipments",
+        ]
+
+        print(f"Running command: {' '.join(dbt_command)}")
+
+        result = subprocess.run(
+            dbt_command,
+            capture_output=True,
+            text=True,
+        )
+
+        print("========================================")
+        print("DBT OUTPUT")
+        print("========================================")
+        print(result.stdout)
+
+        if result.stderr:
+            print("========================================")
+            print("DBT STDERR")
+            print("========================================")
+            print(result.stderr)
+
+        print("========================================")
+        print(f"DBT RETURN CODE: {result.returncode}")
+        print("========================================")
+
+        if result.returncode != 0:
+            raise Exception(
+                f"Olist dbt build failed with exit code " f"{result.returncode}"
+            )
+
+        print("========================================")
+        print("OLIST DBT BUILD COMPLETED SUCCESSFULLY")
+        print("========================================")
 
     # ------------------------------------------------------
     # Pipeline order
     # ------------------------------------------------------
     job_info = trigger_airbyte_sync()
 
-    wait_for_airbyte(job_info)
+    airbyte_complete = wait_for_airbyte(job_info)
+
+    airbyte_complete >> run_dbt_build()
 
 
 olist_data_pipeline()
-

@@ -125,7 +125,7 @@ def supplier_shipment_pipeline():
     @task
     def run_dbt_build():
         print("========================================")
-        print("STARTING DBT BUILD")
+        print("STARTING SUPPLIER DBT BUILD")
         print("========================================")
 
         dbt_command = [
@@ -134,6 +134,10 @@ def supplier_shipment_pipeline():
             "data-governance-dbt",
             "dbt",
             "build",
+            "--select",
+            "staging.stg_supplier_shipments "
+            "intermediate.int_supplier_shipments "
+            "marts.fact_supplier_shipments",
         ]
 
         print(f"Running command: {' '.join(dbt_command)}")
@@ -160,10 +164,12 @@ def supplier_shipment_pipeline():
         print("========================================")
 
         if result.returncode != 0:
-            raise Exception(f"dbt build failed with exit code {result.returncode}")
+            raise Exception(
+                f"Supplier dbt build failed with exit code " f"{result.returncode}"
+            )
 
         print("========================================")
-        print("DBT BUILD COMPLETED SUCCESSFULLY")
+        print("SUPPLIER DBT BUILD COMPLETED SUCCESSFULLY")
         print("========================================")
 
     generate_shipments() >> sync_with_airbyte() >> run_dbt_build()
