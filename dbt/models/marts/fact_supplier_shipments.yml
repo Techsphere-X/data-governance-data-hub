@@ -10,6 +10,8 @@ models:
       metrics:
         total_shipments:
           type: count
+          sql: ${shipment_id}
+          label: "Total Shipments"
           description: "Total number of supplier shipments."
 
         total_quantity:
@@ -71,9 +73,10 @@ models:
 
       - name: shipment_status
         description: "Current supplier shipment status."
-        tests:
+        data_tests:
           - accepted_values:
-              values: ['Pending', 'In Transit', 'Delivered', 'Delayed']
+              arguments:
+                values: ['Pending', 'In Transit', 'Delivered', 'Delayed']
 
       - name: delivery_days
         description: "Number of days between shipment date and actual delivery date."

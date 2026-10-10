@@ -1,0 +1,41 @@
+version: 2
+
+models:
+
+  - name: stg_weather_sao
+    description: "Deduplicated NOAA weather observations for Sao Paulo."
+    columns:
+      - name: weather_date
+        data_tests:
+          - not_null
+
+      - name: station
+        data_tests:
+          - not_null
+
+      - name: datatype
+        data_tests:
+          - not_null
+
+      - name: value
+        data_tests:
+          - not_null
+
+  - name: stg_weather_rio
+    description: "Deduplicated NOAA weather observations for Rio de Janeiro."
+    columns:
+      - name: weather_date
+        data_tests:
+          - not_null
+
+      - name: station
+        data_tests:
+          - not_null
+
+      - name: datatype
+        data_tests:
+          - not_null
+
+      - name: value
+        data_tests:
+          - not_null

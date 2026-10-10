@@ -1,0 +1,99 @@
+version: 2
+
+models:
+  - name: fact_orders_weather
+    description: >
+      Order-level fact model combining Olist order metrics, customer city
+      information, and daily weather measurements for São Paulo and Rio de
+      Janeiro, Belo Horizonte, and Curitiba when matching weather data is available.
+
+    meta:
+      label: "Orders with Weather"
+      group_label: "Weather Analysis"
+      metrics:
+        total_orders:
+          type: count_distinct
+          sql: ${order_id}
+          label: "Total Orders"
+          description: "Distinct number of orders."
+
+        order_value_sum:
+          type: sum
+          sql: ${total_order_value}
+          label: "Total Order Value"
+          description: "Sum of order values, including item prices and freight."
+
+        average_delivery_days:
+          type: average
+          sql: ${delivery_days}
+          label: "Average Delivery Days"
+          description: "Average elapsed days between purchase and customer delivery."
+
+        late_orders:
+          type: sum
+          sql: ${is_late}
+          label: "Late Orders"
+          description: "Number of orders flagged as late."
+
+        average_daily_temperature:
+          type: average
+          sql: ${average_temperature}
+          label: "Average Daily Temperature"
+          description: "Average recorded daily temperature for orders with matched weather data."
+
+        average_minimum_temperature:
+          type: average
+          sql: ${minimum_temperature}
+          label: "Average Minimum Temperature"
+          description: "Average recorded daily minimum temperature for matched orders."
+
+        average_precipitation:
+          type: average
+          sql: ${precipitation}
+          label: "Average Precipitation"
+          description: "Average recorded precipitation for matched orders."
+
+    columns:
+      - name: order_id
+        description: "Unique identifier for an order."
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Identifier of the customer who placed the order."
+        tests:
+          - not_null
+
+      - name: customer_city
+        description: "Customer city, normalized to lowercase for station matching."
+
+      - name: customer_state
+        description: "Brazilian state abbreviation for the customer."
+
+      - name: weather_station
+        description: "Matched weather station: Sao, Rio, or null when no station is assigned."
+
+      - name: weather_date
+        description: "Order purchase date used to match daily weather records."
+
+      - name: precipitation
+        description: "Daily precipitation measurement from the matched weather station."
+
+      - name: average_temperature
+        description: "Daily average temperature from the matched weather station."
+
+      - name: minimum_temperature
+        description: "Daily minimum temperature from the matched weather station."
+
+      - name: total_order_value
+        description: "Total item price plus freight for the order."
+
+      - name: delivery_days
+        description: "Elapsed days from order purchase to customer delivery."
+
+      - name: delivery_delay_days
+        description: "Difference in days between customer delivery and estimated delivery."
+
+      - name: is_late
+        description: "Flag indicating whether customer delivery occurred after the estimated delivery date: 1 for late, 0 otherwise."

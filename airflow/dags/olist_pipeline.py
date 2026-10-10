@@ -22,9 +22,7 @@ def olist_data_pipeline():
         client_id = os.environ["AIRBYTE_CLIENT_ID"]
         client_secret = os.environ["AIRBYTE_CLIENT_SECRET"]
 
-        # --------------------------------------------------
         # 1. Get Airbyte API access token
-        # --------------------------------------------------
         token_response = requests.post(
             f"{airbyte_url}/api/public/v1/applications/token",
             json={
@@ -36,14 +34,11 @@ def olist_data_pipeline():
         )
 
         token_response.raise_for_status()
-
         token = token_response.json()["access_token"]
 
         print("Airbyte API authentication successful.")
 
-        # --------------------------------------------------
         # 2. Start the existing Olist Airbyte connection
-        # --------------------------------------------------
         response = requests.post(
             f"{airbyte_url}/api/public/v1/jobs",
             headers={
@@ -57,7 +52,6 @@ def olist_data_pipeline():
         )
 
         response.raise_for_status()
-
         job_id = response.json()["jobId"]
 
         print(f"Olist Airbyte sync started. Job ID: {job_id}")
@@ -74,11 +68,8 @@ def olist_data_pipeline():
         job_id = job_info["job_id"]
         token = job_info["token"]
 
-        # --------------------------------------------------
         # 3. Wait for Airbyte job to finish
-        # --------------------------------------------------
         while True:
-
             time.sleep(15)
 
             response = requests.get(
@@ -100,13 +91,9 @@ def olist_data_pipeline():
                 print("Olist Airbyte sync completed successfully.")
                 return
 
-            if status in [
-                "failed",
-                "cancelled",
-                "incomplete",
-            ]:
+            if status in ["failed", "cancelled", "incomplete"]:
                 raise Exception(
-                    f"Olist Airbyte sync failed. " f"Job {job_id} status: {status}"
+                    f"Olist Airbyte sync failed. Job {job_id} status: {status}"
                 )
 
     @task
@@ -122,7 +109,7 @@ def olist_data_pipeline():
             "dbt",
             "build",
             "--select",
-            "staging.* intermediate.* marts.*",
+            "staging.* intermediate.* marts.* fact_orders_weather",
             "--exclude",
             "staging.stg_supplier_shipments "
             "intermediate.int_supplier_shipments "
@@ -145,7 +132,6 @@ def olist_data_pipeline():
         if result.stderr:
             print("========================================")
             print("DBT STDERR")
-            print("========================================")
             print(result.stderr)
 
         print("========================================")
@@ -154,20 +140,17 @@ def olist_data_pipeline():
 
         if result.returncode != 0:
             raise Exception(
-                f"Olist dbt build failed with exit code " f"{result.returncode}"
+                f"Olist dbt build failed with exit code {result.returncode}"
             )
 
         print("========================================")
         print("OLIST DBT BUILD COMPLETED SUCCESSFULLY")
         print("========================================")
 
-    # ------------------------------------------------------
-    # Pipeline order
-    # ------------------------------------------------------
+    # Pipeline order:
+    # Airbyte sync -> wait for completion -> dbt build and tests
     job_info = trigger_airbyte_sync()
-
     airbyte_complete = wait_for_airbyte(job_info)
-
     airbyte_complete >> run_dbt_build()
 
 

@@ -36,3 +36,33 @@ sources:
 
       - name: supplier_shipments
         description: "Raw supplier shipment records containing shipment, supplier, product, quantity, delivery, and status information."
+
+
+  - name: raw_olist_weather
+    schema: raw_olist_weather
+    description: "Raw NOAA weather observations ingested through Airbyte."
+
+    tables:
+      - name: weather_sao
+        identifier: Sao
+        quoting:
+          identifier: true
+        description: "Raw NOAA weather observations for the Sao Paulo station."
+
+      - name: weather_rio
+        identifier: Rio
+        quoting:
+          identifier: true
+        description: "Raw NOAA weather observations for the Rio de Janeiro station."
+
+      - name: weather_belo_horizonte
+        identifier: Belo_Horizonte
+        quoting:
+          identifier: true
+        description: "Raw NOAA weather observations for the Belo Horizonte station."
+
+      - name: weather_curitiba
+        identifier: Curitiba
+        quoting:
+          identifier: true
+        description: "Raw NOAA weather observations for the Curitiba station."
