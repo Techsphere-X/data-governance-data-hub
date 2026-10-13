@@ -1,0 +1,73 @@
+
+services:
+
+  airflow-postgres:
+    image: postgres:16
+    container_name: data-governance-airflow-postgres
+
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+
+    volumes:
+      - airflow_postgres_data:/var/lib/postgresql/data
+
+    restart: unless-stopped
+
+
+  airflow:
+    build:
+      context: ..
+      dockerfile: airflow/Dockerfile
+
+    container_name: data-governance-airflow
+
+    depends_on:
+      - airflow-postgres
+
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres:5432/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
+
+      DB_HOST: data-governance-postgres
+      DB_PORT: "5432"
+      DB_NAME: governance
+      DB_USER: governance
+      DB_PASSWORD: governance_dev
+      DB_SCHEMA: farm_source
+
+    networks:
+      - default
+      - project-network
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ../data-generator:/opt/airflow/data-generator
+
+    ports:
+      - "8081:8080"
+
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create --username admin --password admin --firstname Airflow --lastname Admin --role Admin --email admin@example.com || true;
+      airflow scheduler &
+      airflow webserver
+      "
+
+    restart: unless-stopped
+
+
+volumes:
+  airflow_postgres_data:
+
+
+networks:
+  project-network:
+    external: true
+    name: docker_default

@@ -1,0 +1,17 @@
+
+version: 2
+
+sources:
+  - name: farm_raw
+    description: "Bronze landing tables ingested by Airbyte from the farm data generator."
+    schema: public
+    tables:
+      - name: farms
+      - name: fields
+      - name: crops
+      - name: products
+      - name: customers
+      - name: orders
+      - name: order_items
+      - name: harvests
+      - name: weather

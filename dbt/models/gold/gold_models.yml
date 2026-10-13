@@ -1,0 +1,106 @@
+
+version: 2
+
+models:
+  - name: dim_farm_customers
+    description: "Gold dimension containing farm customers."
+    columns:
+      - name: customer_id
+        description: "Unique identifier for each customer."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_name
+        data_tests:
+          - not_null
+
+  - name: fact_farm_orders
+    description: "Gold fact table containing farm order metrics."
+    columns:
+      - name: order_id
+        description: "Unique identifier for each order."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_farm_customers')
+                field: customer_id
+
+      - name: status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['pending', 'confirmed', 'completed', 'cancelled']
+
+  - name: fact_farm_harvests
+    description: "Gold fact table containing harvest quantities and farm details."
+    columns:
+      - name: harvest_id
+        description: "Unique identifier for each harvest."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: field_id
+        data_tests:
+          - not_null
+
+      - name: crop_id
+        data_tests:
+          - not_null
+
+      - name: quantity_kg
+        data_tests:
+          - not_null
+
+  
+  - name: fact_farm_product_performance
+    description: "Gold product performance metrics."
+    columns:
+      - name: product_id
+        data_tests:
+          - not_null
+          - unique
+
+      - name: total_orders
+        data_tests:
+          - not_null
+
+      - name: total_quantity_ordered
+        data_tests:
+          - not_null
+
+      - name: total_ordered_amount
+        data_tests:
+          - not_null
+
+  - name: fact_farm_weather_daily
+    description: "Daily weather summaries by location."
+    columns:
+      - name: location
+        data_tests:
+          - not_null
+
+      - name: weather_date
+        data_tests:
+          - not_null
+
+      - name: weather_observation_count
+        data_tests:
+          - not_null
+
+      - name: average_temperature_c
+        data_tests:
+          - not_null
+
+    data_tests:
+      - unique:
+          arguments:
+            column_name: "location || '-' || weather_date::text"
