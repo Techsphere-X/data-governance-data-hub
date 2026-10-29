@@ -4,8 +4,9 @@ models:
   - name: fact_orders_weather
     description: >
       Order-level fact model combining Olist order metrics, customer city
-      information, and daily weather measurements for São Paulo and Rio de
+      information, and daily weather measurements for São Paulo, Rio de
       Janeiro, Belo Horizonte, and Curitiba when matching weather data is available.
+      Grain: one row per order_id.
 
     meta:
       label: "Orders with Weather"
@@ -71,29 +72,56 @@ models:
       - name: customer_state
         description: "Brazilian state abbreviation for the customer."
 
+      - name: order_status
+        description: "Current recorded status of the order, such as delivered, shipped, canceled, or processing."
+
+      - name: order_purchase_at
+        description: "Timestamp when the customer placed the order."
+
+      - name: order_approved_at
+        description: "Timestamp when the order payment was approved; may be null if approval has not occurred or was not recorded."
+
+      - name: order_delivered_carrier_at
+        description: "Timestamp when the order was handed over to the carrier; may be null if this event has not occurred or was not recorded."
+
+      - name: order_delivered_customer_at
+        description: "Timestamp when the order was delivered to the customer; may be null for orders not yet delivered."
+
+      - name: order_estimated_delivery_at
+        description: "Estimated timestamp or date for delivery to the customer."
+
+      - name: item_count
+        description: "Number of order items associated with the order."
+
+      - name: total_price
+        description: "Sum of product prices for all items in the order, excluding freight."
+
+      - name: total_freight_value
+        description: "Sum of freight charges for all items in the order."
+
       - name: weather_station
-        description: "Matched weather station: Sao, Rio, or null when no station is assigned."
+        description: "Matched weather station for the customer's city: Sao, Rio, Belo_Horizonte, or Curitiba; null when no station is assigned."
 
       - name: weather_date
         description: "Order purchase date used to match daily weather records."
 
       - name: precipitation
-        description: "Daily precipitation measurement from the matched weather station."
+        description: "Daily precipitation measurement from the matched weather station; null when a matching observation is unavailable."
 
       - name: average_temperature
-        description: "Daily average temperature from the matched weather station."
+        description: "Daily average temperature from the matched weather station; null when a matching observation is unavailable."
 
       - name: minimum_temperature
-        description: "Daily minimum temperature from the matched weather station."
+        description: "Daily minimum temperature from the matched weather station; null when a matching observation is unavailable."
 
       - name: total_order_value
-        description: "Total item price plus freight for the order."
+        description: "Total order value calculated from item prices and freight charges."
 
       - name: delivery_days
-        description: "Elapsed days from order purchase to customer delivery."
+        description: "Elapsed number of days from order purchase to customer delivery."
 
       - name: delivery_delay_days
-        description: "Difference in days between customer delivery and estimated delivery."
+        description: "Difference in days between actual customer delivery and estimated delivery."
 
       - name: is_late
         description: "Flag indicating whether customer delivery occurred after the estimated delivery date: 1 for late, 0 otherwise."

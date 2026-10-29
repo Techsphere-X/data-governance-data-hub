@@ -1,0 +1,200 @@
+version: 2
+
+models:
+  - name: stg_products
+    description: >
+      Staging model for Olist product records. Renames columns to consistent
+      names while retaining product attributes from the raw source.
+      Grain: one row per product_id.
+
+    columns:
+      - name: product_id
+        description: "Unique identifier for a product."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name
+        description: "Original category name assigned to the product."
+
+      - name: product_name_length
+        description: "Length of the product name."
+
+      - name: product_description_length
+        description: "Length of the product description."
+
+      - name: product_photos_qty
+        description: "Number of photos associated with the product."
+
+      - name: product_weight_g
+        description: "Product weight in grams."
+
+      - name: product_length_cm
+        description: "Product length in centimeters."
+
+      - name: product_height_cm
+        description: "Product height in centimeters."
+
+      - name: product_width_cm
+        description: "Product width in centimeters."
+
+  - name: stg_product_categories
+    description: >
+      Staging model containing product category names and their English
+      translations.
+      Grain: one row per product_category_name.
+
+    columns:
+      - name: product_category_name
+        description: "Original product category name."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_category_name_english
+        description: "English translation of the product category name."
+        data_tests:
+          - not_null
+
+  - name: stg_orders
+    description: >
+      Staging model for Olist orders. Standardizes timestamp column names
+      and converts order date fields to timestamps.
+      Grain: one row per order_id.
+
+    columns:
+      - name: order_id
+        description: "Unique identifier for an order."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: "Identifier of the customer who placed the order."
+        data_tests:
+          - not_null
+
+      - name: order_status
+        description: "Current recorded status of the order."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - delivered
+                  - shipped
+                  - canceled
+                  - unavailable
+                  - invoiced
+                  - processing
+                  - created
+                  - approved
+
+      - name: order_purchase_at
+        description: "Timestamp when the order was placed."
+        data_tests:
+          - not_null
+
+      - name: order_approved_at
+        description: "Timestamp when the order was approved."
+
+      - name: order_delivered_carrier_at
+        description: "Timestamp when the order was handed to the carrier."
+
+      - name: order_delivered_customer_at
+        description: "Timestamp when the order was delivered to the customer."
+
+      - name: order_estimated_delivery_at
+        description: "Estimated delivery date and time for the order."
+
+  - name: stg_order_payments
+    description: >
+      Staging model for Olist order payment records. Renames payment sequence,
+      installment, and value columns to clearer names.
+      Grain: one row per order_id and payment_record_number.
+
+    columns:
+      - name: order_id
+        description: "Identifier of the order associated with the payment."
+        data_tests:
+          - not_null
+
+      - name: payment_record_number
+        description: "Sequence number identifying a payment record within an order."
+        data_tests:
+          - not_null
+
+      - name: payment_type
+        description: "Payment method used for the order."
+        data_tests:
+          - not_null
+
+      - name: installment_count
+        description: "Number of installments selected for the payment."
+
+      - name: payment_amount
+        description: "Value of the payment."
+
+  - name: stg_order_items
+    description: >
+      Staging model for individual items within Olist orders. Standardizes
+      the order item identifier, shipping timestamp, and numeric price fields.
+      Grain: one row per order_id and order_item_id.
+
+    columns:
+      - name: order_id
+        description: "Identifier of the order containing the item."
+        data_tests:
+          - not_null
+
+      - name: order_item_id
+        description: "Item sequence number within an order."
+        data_tests:
+          - not_null
+
+      - name: product_id
+        description: "Identifier of the product included in the order item."
+        data_tests:
+          - not_null
+
+      - name: seller_id
+        description: "Identifier of the seller providing the product."
+        data_tests:
+          - not_null
+
+      - name: shipping_limit_at
+        description: "Timestamp representing the seller shipping limit."
+
+      - name: price
+        description: "Price of the order item."
+
+      - name: freight_value
+        description: "Freight charge associated with the order item."
+
+  - name: stg_customers
+    description: >
+      Staging model for Olist customer records. Standardizes customer location
+      values by trimming whitespace, converting city names to lowercase,
+      and converting state abbreviations to uppercase.
+      Grain: one row per customer_id.
+
+    columns:
+      - name: customer_id
+        description: "Identifier of the customer record."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        description: "Identifier representing a customer's unique identity across orders."
+        data_tests:
+          - not_null
+
+      - name: customer_zip_code_prefix
+        description: "Postal code prefix associated with the customer."
+
+      - name: customer_city
+        description: "Customer city, trimmed and converted to lowercase."
+
+      - name: customer_state
+        description: "Customer state abbreviation, trimmed and converted to uppercase."

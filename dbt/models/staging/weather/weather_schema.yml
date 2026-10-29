@@ -1,41 +1,114 @@
 version: 2
 
 models:
-
   - name: stg_weather_sao
-    description: "Deduplicated NOAA weather observations for Sao Paulo."
+    description: >
+      Deduplicated daily NOAA weather observations for the Sao Paulo station.
+      Grain: one row per combination of station, weather_date, and datatype.
     columns:
       - name: weather_date
+        description: "Calendar date on which the weather observation was recorded."
         data_tests:
           - not_null
 
       - name: station
+        description: "NOAA identifier of the weather station."
         data_tests:
           - not_null
 
       - name: datatype
+        description: "NOAA measurement type, such as TAVG for average temperature, TMIN for minimum temperature, or PRCP for precipitation."
         data_tests:
           - not_null
 
       - name: value
+        description: "Recorded numeric value for the specified weather measurement."
         data_tests:
           - not_null
+
+      - name: attributes
+        description: "NOAA attributes associated with the weather observation."
 
   - name: stg_weather_rio
-    description: "Deduplicated NOAA weather observations for Rio de Janeiro."
+    description: >
+      Deduplicated daily NOAA weather observations for the Rio de Janeiro station.
+      Grain: one row per combination of station, weather_date, and datatype.
     columns:
       - name: weather_date
+        description: "Calendar date on which the weather observation was recorded."
         data_tests:
           - not_null
 
       - name: station
+        description: "NOAA identifier of the weather station."
         data_tests:
           - not_null
 
       - name: datatype
+        description: "NOAA measurement type, such as TAVG for average temperature, TMIN for minimum temperature, or PRCP for precipitation."
         data_tests:
           - not_null
 
       - name: value
+        description: "Recorded numeric value for the specified weather measurement."
         data_tests:
           - not_null
+
+      - name: attributes
+        description: "NOAA attributes associated with the weather observation."
+
+  - name: stg_weather_belo_horizonte
+    description: >
+      Deduplicated NOAA weather observations for the Belo Horizonte station.
+      Grain: one row per combination of station, weather_date, and datatype.
+    columns:
+      - name: weather_date
+        description: "Calendar date on which the weather observation was recorded."
+        data_tests:
+          - not_null
+
+      - name: station
+        description: "NOAA identifier of the weather station."
+        data_tests:
+          - not_null
+
+      - name: datatype
+        description: "NOAA measurement type. Current ingested records contain TAVG observations."
+        data_tests:
+          - not_null
+
+      - name: value
+        description: "Recorded numeric value for the specified weather measurement."
+        data_tests:
+          - not_null
+
+      - name: attributes
+        description: "NOAA attributes associated with the weather observation."
+
+  - name: stg_weather_curitiba
+    description: >
+      Deduplicated NOAA weather observations for the Curitiba station.
+      Grain: one row per combination of station, weather_date, and datatype.
+    columns:
+      - name: weather_date
+        description: "Calendar date on which the weather observation was recorded."
+        data_tests:
+          - not_null
+
+      - name: station
+        description: "NOAA identifier of the weather station."
+        data_tests:
+          - not_null
+
+      - name: datatype
+        description: "NOAA measurement type. Current ingested records contain TAVG observations."
+        data_tests:
+          - not_null
+
+      - name: value
+        description: "Recorded numeric value for the specified weather measurement."
+        data_tests:
+          - not_null
+
+      - name: attributes
+        description: "NOAA attributes associated with the weather observation."

@@ -2,7 +2,10 @@ version: 2
 
 models:
   - name: int_order_payments
-    description: "Payment-level intermediate model containing one row per payment record."
+    description: >
+      Payment-level intermediate model containing payment records enriched
+      with the associated order purchase timestamp.
+      Grain: one row per combination of order_id and payment_record_number.
 
     columns:
 

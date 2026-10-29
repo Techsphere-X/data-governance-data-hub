@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: int_supplier_shipments
+    description: >
+      Intermediate model for supplier shipment records. Calculates delivery
+      duration, delay days, and delivery performance indicators.
+      Grain: one row per shipment_id.
+
+    columns:
+      - name: shipment_id
+        description: "Unique identifier of the supplier shipment."
+
+      - name: product_id
+        description: "Identifier of the product included in the shipment."
+
+      - name: supplier_id
+        description: "Identifier of the supplier responsible for the shipment."
+
+      - name: shipment_date
+        description: "Date the shipment was sent or recorded as shipped."
+
+      - name: quantity
+        description: "Quantity of products included in the shipment."
+
+      - name: expected_delivery_date
+        description: "Expected date for the shipment to be delivered."
+
+      - name: actual_delivery_date
+        description: "Actual date the shipment was delivered, or null if it has not yet been delivered."
+
+      - name: shipment_status
+        description: "Recorded operational status of the shipment."
+
+      - name: updated_at
+        description: "Timestamp indicating when the source shipment record was last updated."
+
+      - name: delivery_days
+        description: "Number of days between the shipment date and actual delivery date; null when the shipment has not been delivered."
+
+      - name: delay_days
+        description: "Number of days the shipment arrived after its expected delivery date, or zero when it was not late or has not been delivered."
+
+      - name: is_delivered
+        description: "Boolean indicator showing whether an actual delivery date is available."
+
+      - name: is_status_delayed
+        description: "Boolean indicator showing whether the recorded shipment status is Delayed."
+
+      - name: is_date_delayed
+        description: "Boolean indicator showing whether the actual delivery date is later than the expected delivery date."
+
+      - name: is_delayed
+        description: "Boolean indicator showing whether the shipment status or delivery dates indicate a delay."
+
+      - name: is_on_time
+        description: "Boolean indicator showing whether the shipment was delivered on or before its expected delivery date."

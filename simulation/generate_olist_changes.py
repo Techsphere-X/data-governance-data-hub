@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 
 import psycopg2
 
-
 # ---------------------------------------------------------
 # Database configuration
 # ---------------------------------------------------------
@@ -19,6 +18,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 # ---------------------------------------------------------
 # Generate 5 new Olist records
 # ---------------------------------------------------------
+
 
 def generate_new_records():
     if not DB_PASSWORD:
@@ -78,22 +78,27 @@ def generate_new_records():
             # Customer
             # ---------------------------------------------
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO public.olist_customers (
                     customer_id,
                     customer_unique_id,
                     customer_zip_code_prefix,
                     customer_city,
-                    customer_state
+                    customer_state,
+                    updated_at
                 )
-                VALUES (%s, %s, %s, %s, %s);
-            """, (
-                customer_id,
-                str(uuid.uuid4()).replace("-", "")[:32],
-                44600 + i,
-                "simulated_city",
-                "SP",
-            ))
+                VALUES (%s, %s, %s, %s, %s, %s);
+            """,
+                (
+                    customer_id,
+                    str(uuid.uuid4()).replace("-", "")[:32],
+                    44600 + i,
+                    "simulated_city",
+                    "SP",
+                    now,
+                ),
+            )
 
             # ---------------------------------------------
             # Order
@@ -101,7 +106,8 @@ def generate_new_records():
 
             purchase_time = now - timedelta(minutes=i)
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO public.olist_orders (
                     order_id,
                     customer_id,
@@ -116,23 +122,26 @@ def generate_new_records():
                 VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, %s
                 );
-            """, (
-                order_id,
-                customer_id,
-                "processing",
-                purchase_time,
-                purchase_time,
-                None,
-                None,
-                purchase_time + timedelta(days=10),
-                now,
-            ))
+            """,
+                (
+                    order_id,
+                    customer_id,
+                    "processing",
+                    purchase_time,
+                    purchase_time,
+                    None,
+                    None,
+                    purchase_time + timedelta(days=10),
+                    now,
+                ),
+            )
 
             # ---------------------------------------------
             # Order item
             # ---------------------------------------------
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO public.olist_order_items (
                     order_id,
                     order_item_id,
@@ -144,22 +153,25 @@ def generate_new_records():
                     updated_at
                 )
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
-            """, (
-                order_id,
-                1,
-                product_id,
-                seller_id,
-                purchase_time + timedelta(days=2),
-                100.00 + i,
-                15.00,
-                now,
-            ))
+            """,
+                (
+                    order_id,
+                    1,
+                    product_id,
+                    seller_id,
+                    purchase_time + timedelta(days=2),
+                    100.00 + i,
+                    15.00,
+                    now,
+                ),
+            )
 
             # ---------------------------------------------
             # Payment
             # ---------------------------------------------
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO public.olist_order_payments (
                     order_id,
                     payment_sequential,
@@ -169,14 +181,16 @@ def generate_new_records():
                     updated_at
                 )
                 VALUES (%s, %s, %s, %s, %s, %s);
-            """, (
-                order_id,
-                1,
-                "credit_card",
-                1,
-                115.00 + i,
-                now,
-            ))
+            """,
+                (
+                    order_id,
+                    1,
+                    "credit_card",
+                    1,
+                    115.00 + i,
+                    now,
+                ),
+            )
 
             print(f"Created order: {order_id}")
 

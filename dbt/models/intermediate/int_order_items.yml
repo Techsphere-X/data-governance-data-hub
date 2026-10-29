@@ -4,7 +4,11 @@ models:
 
   - name: int_order_items
 
-    description: "Order-item level model enriched with order, product, and product category information."
+    description: >
+      Order-item level model enriched with order, product, and product category
+      information. Calculates item revenue from the item price and freight value.
+      Grain: one row per combination of order_id and order_item_id.
+
 
     columns:
 

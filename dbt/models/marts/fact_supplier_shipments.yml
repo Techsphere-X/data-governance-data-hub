@@ -4,7 +4,10 @@ version: 2
 models:
 
   - name: fact_supplier_shipments
-    description: "Supplier shipment fact table containing one row per supplier shipment and delivery performance metrics."
+    description: >
+      Supplier shipment fact table containing shipment details, product
+      category information, and delivery performance metrics.
+      Grain: one row per shipment_id.
 
     meta:
       metrics:

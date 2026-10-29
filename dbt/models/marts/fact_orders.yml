@@ -4,7 +4,11 @@ models:
 
   - name: fact_orders
 
-    description: "Order-level fact table containing one row per order, with order status, purchase and delivery timestamps, item counts, product sales, freight, total order value, and delivery performance metrics."
+    description: >
+      Order-level fact table containing order status, purchase and delivery
+      timestamps, item counts, product sales, freight, total order value,
+      and delivery performance metrics.
+      Grain: one row per order_id.
 
     meta:
 

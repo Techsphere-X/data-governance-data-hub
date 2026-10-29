@@ -1,3 +1,4 @@
+
 with payments as (
 
     select
@@ -14,8 +15,10 @@ orders as (
 
     select
         order_id,
-        total_order_value
-    from {{ ref('fact_orders') }}
+        sum(item_revenue) as total_order_value
+    from {{ ref('int_order_items') }}
+    group by
+        order_id
 
 )
 

@@ -2,14 +2,17 @@ version: 2
 
 models:
   - name: fact_payments
-    description: "Payment-level fact table containing one row per payment record for an order."
+    description: >
+      Payment-level fact table containing payment details and the associated
+      order purchase timestamp.
+      Grain: one row per combination of order_id and payment_record_number.
 
     meta:
       metrics:
 
         payment_count:
           type: count
-          sql: ${order_id}
+          sql: ${payment_record_number}
           label: Payment Count
           description: "Number of payment records."
 

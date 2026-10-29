@@ -45,18 +45,18 @@ def get_product_ids():
         password=SUPPLIER_DB_PASSWORD,
     )
 
-    cursor = connection.cursor()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT product_id
+                FROM public.olist_products
+                WHERE product_id IS NOT NULL;
+                """)
 
-    cursor.execute("""
-        SELECT product_id
-        FROM public.olist_products
-        WHERE product_id IS NOT NULL;
-    """)
+            product_ids = [row[0] for row in cursor.fetchall()]
 
-    product_ids = [row[0] for row in cursor.fetchall()]
-
-    cursor.close()
-    connection.close()
+    finally:
+        connection.close()
 
     return product_ids
 
@@ -84,29 +84,32 @@ def generate_shipments(product_ids):
     today = date.today()
 
     for number in range(1, NUMBER_OF_SHIPMENTS + 1):
+        shipment_date = today - timedelta(days=random.randint(0, 7))
 
-        shipment_date = today - timedelta(
-            days=random.randint(0, 7)
-        )
-
-        expected_delivery_date = shipment_date + timedelta(
-            days=random.randint(3, 7)
-        )
+        expected_delivery_date = shipment_date + timedelta(days=random.randint(3, 7))
 
         status = random.choice(statuses)
 
-        # Delivered and delayed shipments have an actual delivery date.
-        if status in ["Delivered", "Delayed"]:
-            actual_delivery_date = expected_delivery_date + timedelta(
-                days=random.randint(-2, 3)
+        # Generate delivery dates consistently with shipment status.
+        if status == "Delivered":
+            # Delivered shipments arrive on time or early.
+            actual_delivery_date = expected_delivery_date - timedelta(
+                days=random.randint(0, 2)
             )
+
+        elif status == "Delayed":
+            # Delayed shipments arrive 1 to 3 days late.
+            actual_delivery_date = expected_delivery_date + timedelta(
+                days=random.randint(1, 3)
+            )
+
         else:
+            # Pending and In Transit shipments have not arrived yet.
             actual_delivery_date = None
 
         shipment = {
             "shipment_id": (
-                f"SHP{datetime.now().strftime('%Y%m%d%H%M%S')}"
-                f"{number:03d}"
+                f"SHP{datetime.now().strftime('%Y%m%d%H%M%S')}" f"{number:03d}"
             ),
             "product_id": random.choice(product_ids),
             "supplier_id": random.choice(suppliers),
@@ -129,9 +132,7 @@ def save_to_csv(shipments):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
     filename = f"shipments_{timestamp}.csv"
-
     filepath = os.path.join(OUTPUT_DIR, filename)
 
     fieldnames = [
@@ -152,7 +153,6 @@ def save_to_csv(shipments):
         newline="",
         encoding="utf-8",
     ) as file:
-
         writer = csv.DictWriter(
             file,
             fieldnames=fieldnames,
@@ -176,7 +176,6 @@ def upload_to_minio(filepath):
     )
 
     filename = os.path.basename(filepath)
-
     object_key = f"{MINIO_PREFIX}{filename}"
 
     s3.upload_file(
@@ -185,10 +184,7 @@ def upload_to_minio(filepath):
         object_key,
     )
 
-    print(
-        f"Uploaded to MinIO: "
-        f"{MINIO_BUCKET}/{object_key}"
-    )
+    print(f"Uploaded to MinIO: " f"{MINIO_BUCKET}/{object_key}")
 
 
 def main():
@@ -196,33 +192,25 @@ def main():
 
     if not SUPPLIER_DB_PASSWORD:
         raise ValueError(
-            "DB_PASSWORD is not set. "
-            "Set it before running the script."
+            "SUPPLIER_DB_PASSWORD is not set. "
+            "Set it in your environment or .env file."
         )
 
     product_ids = get_product_ids()
 
     if not product_ids:
-        raise ValueError(
-            "No product IDs were found in "
-            "public.olist_products."
-        )
+        raise ValueError("No product IDs were found in " "public.olist_products.")
 
-    print(
-        f"Found {len(product_ids)} existing product IDs."
-    )
+    print(f"Found {len(product_ids)} existing product IDs.")
 
     shipments = generate_shipments(product_ids)
-
     filepath = save_to_csv(shipments)
 
-    print(
-        f"Generated {len(shipments)} shipment records."
-    )
+    print(f"Generated {len(shipments)} shipment records.")
 
     print(f"CSV created: {filepath}")
 
-    # Upload the generated CSV to MinIO
+    # Upload the generated CSV to MinIO.
     upload_to_minio(filepath)
 
 

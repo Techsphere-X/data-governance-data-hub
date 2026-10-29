@@ -1,3 +1,4 @@
+
 {{ config(materialized='table') }}
 
 select
@@ -20,9 +21,13 @@ select
     s.is_delayed,
     s.is_on_time,
 
-    p.product_category_name
+    p.product_category_name,
+    pc.product_category_name_english
 
 from {{ ref('int_supplier_shipments') }} s
 
 left join {{ ref('stg_products') }} p
     on s.product_id = p.product_id
+
+left join {{ ref('stg_product_categories') }} pc
+    on p.product_category_name = pc.product_category_name

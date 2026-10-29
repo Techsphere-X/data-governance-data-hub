@@ -1,8 +1,13 @@
+
 version: 2
 
 models:
   - name: int_order_payment_value
-    description: "Intermediate model containing one row per order and payment type, used to analyze order value by payment method."
+    description: >
+      Combines order payment types with the total order value calculated from
+      order items. Each order can appear multiple times when it has different
+      payment types.
+      Grain: one row per combination of order_id and payment_type.
 
     meta:
       metrics:
@@ -10,7 +15,10 @@ models:
           type: average
           sql: ${total_order_value}
           label: Average Order Value
-          description: "Average order value for orders associated with each payment method."
+          description: >
+            Average total order value for orders associated with each
+            payment method. Orders using multiple payment types may
+            appear in multiple payment-method groups.
 
     columns:
       - name: order_id
@@ -19,15 +27,17 @@ models:
           - not_null
           - relationships:
               arguments:
-                to: ref('fact_orders')
+                to: ref('int_order_items')
                 field: order_id
 
       - name: payment_type
-        description: "Payment method used for the order."
+        description: "Payment method associated with the order."
         tests:
           - not_null
 
       - name: total_order_value
-        description: "Total value of the order, including product price and freight."
+        description: >
+          Total order value calculated as the sum of item revenue and
+          freight across the order's items.
         tests:
           - not_null

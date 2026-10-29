@@ -5,7 +5,9 @@ models:
 
   - name: dim_customers
 
-    description: "Customer dimension containing one row per customer record, including location information."
+    description: >
+      Customer dimension containing customer identifiers and location information.
+      Grain: one row per customer_id.
 
     columns:
 

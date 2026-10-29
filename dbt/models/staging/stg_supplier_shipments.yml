@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_supplier_shipments
+    description: >
+      Standardized staging model for supplier shipment records loaded from CSV
+      through Airbyte into PostgreSQL. Converts date, quantity, and timestamp
+      fields into appropriate data types and converts empty actual delivery
+      dates to null. Grain: one row per shipment_id.
+
+    columns:
+      - name: shipment_id
+        description: "Unique identifier for a supplier shipment."
+        data_tests:
+          - not_null
+          - unique
+
+      - name: product_id
+        description: "Identifier of the product associated with the shipment."
+        data_tests:
+          - not_null
+
+      - name: supplier_id
+        description: "Identifier of the supplier responsible for the shipment."
+        data_tests:
+          - not_null
+
+      - name: shipment_date
+        description: "Date the shipment was sent."
+        data_tests:
+          - not_null
+
+      - name: quantity
+        description: "Number of product units included in the shipment."
+        data_tests:
+          - not_null
+
+      - name: expected_delivery_date
+        description: "Expected date of delivery."
+        data_tests:
+          - not_null
+
+      - name: actual_delivery_date
+        description: "Actual delivery date, if delivered. Empty source values are converted to null."
+
+      - name: shipment_status
+        description: "Current recorded status of the supplier shipment."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Pending
+                  - In Transit
+                  - Delivered
+                  - Delayed
+
+      - name: updated_at
+        description: "Timestamp when the supplier shipment record was last updated."

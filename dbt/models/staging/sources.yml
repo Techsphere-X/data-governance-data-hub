@@ -2,41 +2,133 @@
 version: 2
 
 sources:
-
   - name: raw
     schema: raw_olist_ecom
     description: "Raw Olist ecommerce data loaded into PostgreSQL and used as the source layer for dbt transformations."
 
     tables:
-
       - name: olist_customers
         description: "Raw customer records containing customer identifiers and geographic information."
+        columns:
+          - name: customer_id
+            description: "Identifier of the customer record."
+          - name: customer_unique_id
+            description: "Identifier representing the customer across their records."
+          - name: customer_zip_code_prefix
+            description: "Prefix of the customer's postal code."
+          - name: customer_city
+            description: "City associated with the customer."
+          - name: customer_state
+            description: "Brazilian state abbreviation associated with the customer."
 
       - name: olist_orders
         description: "Raw order records containing order status and purchase, approval, delivery, and estimated delivery timestamps."
+        columns:
+          - name: order_id
+            description: "Unique identifier for an order."
+          - name: customer_id
+            description: "Identifier of the customer who placed the order."
+          - name: order_status
+            description: "Current recorded status of the order."
+          - name: order_purchase_timestamp
+            description: "Timestamp when the order was placed."
+          - name: order_approved_at
+            description: "Timestamp when the order payment was approved."
+          - name: order_delivered_carrier_date
+            description: "Timestamp when the order was handed to the carrier."
+          - name: order_delivered_customer_date
+            description: "Timestamp when the order was delivered to the customer."
+          - name: order_estimated_delivery_date
+            description: "Estimated date for delivery to the customer."
 
       - name: olist_order_items
         description: "Raw order item records linking orders to products and containing product price and freight values."
+        columns:
+          - name: order_id
+            description: "Identifier of the order containing the item."
+          - name: order_item_id
+            description: "Item sequence number within an order."
+          - name: product_id
+            description: "Identifier of the ordered product."
+          - name: seller_id
+            description: "Identifier of the seller associated with the item."
+          - name: shipping_limit_date
+            description: "Deadline for shipping the item."
+          - name: price
+            description: "Price of the item."
+          - name: freight_value
+            description: "Freight charge associated with the item."
 
       - name: olist_products
         description: "Raw product records containing product-level attributes."
+        columns:
+          - name: product_id
+            description: "Unique identifier for a product."
+          - name: product_category_name
+            description: "Original product category name."
+          - name: product_name_lenght
+            description: "Length of the product name as recorded in the source."
+          - name: product_description_lenght
+            description: "Length of the product description as recorded in the source."
+          - name: product_photos_qty
+            description: "Number of product photos."
+          - name: product_weight_g
+            description: "Product weight in grams."
+          - name: product_length_cm
+            description: "Product length in centimeters."
+          - name: product_height_cm
+            description: "Product height in centimeters."
+          - name: product_width_cm
+            description: "Product width in centimeters."
 
       - name: olist_product_category_translation
         description: "Raw mapping between product category names and their English translations."
+        columns:
+          - name: product_category_name
+            description: "Product category name in the source language."
+          - name: product_category_name_english
+            description: "English translation of the product category name."
 
       - name: olist_order_payments
         description: "Raw order payment records containing payment type and value."
-
+        columns:
+          - name: order_id
+            description: "Identifier of the order associated with the payment."
+          - name: payment_sequential
+            description: "Sequence number of the payment within an order."
+          - name: payment_type
+            description: "Payment method used for the order."
+          - name: payment_installments
+            description: "Number of installments used for the payment."
+          - name: payment_value
+            description: "Monetary value of the payment."
 
   - name: raw_shipment_csv
     schema: raw_shipment_csv
     description: "Raw supplier shipment data loaded from CSV files through Airbyte."
 
     tables:
-
       - name: supplier_shipments
         description: "Raw supplier shipment records containing shipment, supplier, product, quantity, delivery, and status information."
-
+        columns:
+          - name: shipment_id
+            description: "Unique identifier for a supplier shipment."
+          - name: product_id
+            description: "Identifier of the product associated with the shipment."
+          - name: supplier_id
+            description: "Identifier of the supplier responsible for the shipment."
+          - name: shipment_date
+            description: "Date the shipment was sent."
+          - name: quantity
+            description: "Number of product units included in the shipment."
+          - name: expected_delivery_date
+            description: "Expected date of delivery."
+          - name: actual_delivery_date
+            description: "Actual delivery date, if delivered."
+          - name: shipment_status
+            description: "Current status of the shipment."
+          - name: updated_at
+            description: "Timestamp when the shipment record was last updated."
 
   - name: raw_olist_weather
     schema: raw_olist_weather
@@ -48,21 +140,93 @@ sources:
         quoting:
           identifier: true
         description: "Raw NOAA weather observations for the Sao Paulo station."
+        columns:
+          - name: date
+            description: "Date of the NOAA weather observation."
+          - name: station
+            description: "NOAA station identifier."
+          - name: datatype
+            description: "NOAA weather measurement type, such as TAVG, TMIN, or PRCP."
+          - name: value
+            description: "Recorded value of the weather measurement."
+          - name: attributes
+            description: "NOAA attributes associated with the observation."
 
       - name: weather_rio
         identifier: Rio
         quoting:
           identifier: true
         description: "Raw NOAA weather observations for the Rio de Janeiro station."
+        columns:
+          - name: date
+            description: "Date of the NOAA weather observation."
+          - name: station
+            description: "NOAA station identifier."
+          - name: datatype
+            description: "NOAA weather measurement type, such as TAVG, TMIN, or PRCP."
+          - name: value
+            description: "Recorded value of the weather measurement."
+          - name: attributes
+            description: "NOAA attributes associated with the observation."
 
       - name: weather_belo_horizonte
         identifier: Belo_Horizonte
         quoting:
           identifier: true
         description: "Raw NOAA weather observations for the Belo Horizonte station."
+        columns:
+          - name: date
+            description: "Date of the NOAA weather observation."
+          - name: station
+            description: "NOAA station identifier."
+          - name: datatype
+            description: "NOAA weather measurement type. Current ingested records contain TAVG."
+          - name: value
+            description: "Recorded value of the weather measurement."
+          - name: attributes
+            description: "NOAA attributes associated with the observation."
 
       - name: weather_curitiba
         identifier: Curitiba
         quoting:
           identifier: true
         description: "Raw NOAA weather observations for the Curitiba station."
+        columns:
+          - name: date
+            description: "Date of the NOAA weather observation."
+          - name: station
+            description: "NOAA station identifier."
+          - name: datatype
+            description: "NOAA weather measurement type. Current ingested records contain TAVG."
+          - name: value
+            description: "Recorded value of the weather measurement."
+          - name: attributes
+            description: "NOAA attributes associated with the observation."
+
+      - name: porto
+        description: "Raw NOAA weather observations for the Canoas station serving the Porto Alegre region."
+        columns:
+          - name: date
+            description: "Date of the NOAA weather observation."
+          - name: station
+            description: "NOAA station identifier for the Canoas station."
+          - name: datatype
+            description: "NOAA weather measurement type, such as TAVG, TMIN, or PRCP."
+          - name: value
+            description: "Recorded value of the weather measurement."
+          - name: attributes
+            description: "NOAA attributes associated with the observation."
+
+      - name: campinas
+        description: "Raw NOAA weather observations for the Campinas Aeroporto station."
+        columns:
+          - name: date
+            description: "Date of the NOAA weather observation."
+          - name: station
+            description: "NOAA station identifier for Campinas Aeroporto."
+          - name: datatype
+            description: "NOAA weather measurement type, such as TAVG, TMIN, or PRCP."
+          - name: value
+            description: "Recorded value of the weather measurement."
+          - name: attributes
+            description: "NOAA attributes associated with the observation."
