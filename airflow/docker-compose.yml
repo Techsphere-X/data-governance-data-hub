@@ -48,9 +48,13 @@ services:
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
       - ../data-generator:/opt/airflow/data-generator
+      - ../dbt:/opt/airflow/dbt
 
     ports:
       - "8081:8080"
+
+    env_file:
+      - .env    
 
     command: >
       bash -c "

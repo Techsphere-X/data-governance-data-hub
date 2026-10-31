@@ -1,0 +1,86 @@
+from datetime import datetime, timedelta
+import os
+from pathlib import Path
+
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.operators.bash import BashOperator
+
+
+DBT_PROJECT_DIR = "/opt/airflow/dbt"
+DBT_EXECUTABLE = "/home/airflow/dbt-venv/bin/dbt"
+DBT_PROFILES_DIR = "/tmp/airflow-dbt-profiles"
+DBT_PROFILE_FILE = f"{DBT_PROFILES_DIR}/profiles.yml"
+
+
+def create_dbt_profile():
+    """Create an Airflow-specific dbt profile without modifying profiles.yml."""
+    Path(DBT_PROFILES_DIR).mkdir(parents=True, exist_ok=True)
+
+    required_vars = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+    missing = [name for name in required_vars if not os.environ.get(name)]
+    if missing:
+        raise ValueError(f"Missing database environment variables: {missing}")
+
+    profile = f"""data_governance:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: {os.environ["DB_HOST"]}
+      port: {os.environ["DB_PORT"]}
+      user: {os.environ["DB_USER"]}
+      password: '{os.environ["DB_PASSWORD"]}'
+      dbname: {os.environ["DB_NAME"]}
+      schema: analytics
+      threads: 4
+"""
+    Path(DBT_PROFILE_FILE).write_text(profile, encoding="utf-8")
+
+
+default_args = {
+    "owner": "data-platform",
+    "retries": 1,
+    "retry_delay": timedelta(minutes=5),
+}
+
+with DAG(
+    dag_id="farm_dbt_analytics_pipeline",
+    description="Run and test farm Silver and Gold dbt models",
+    default_args=default_args,
+    start_date=datetime(2026, 10, 14),
+    schedule="@daily",
+    catchup=False,
+    tags=["farm", "dbt", "analytics"],
+) as dag:
+
+    prepare_dbt_profile = PythonOperator(
+        task_id="prepare_dbt_profile",
+        python_callable=create_dbt_profile,
+    )
+
+    run_silver_gold = BashOperator(
+        task_id="run_silver_gold_models",
+        bash_command=(
+            f"export DBT_LOG_PATH=/tmp/dbt-logs && "
+            f"{DBT_EXECUTABLE} run "
+            f"--project-dir {DBT_PROJECT_DIR} "
+            f"--target-path /tmp/airflow-dbt-target "
+            f"--profiles-dir {DBT_PROFILES_DIR} "
+            f"--select path:models/silver path:models/gold"
+        ),
+    )
+
+    test_silver_gold = BashOperator(
+        task_id="test_silver_gold_models",
+        bash_command=(
+            f"export DBT_LOG_PATH=/tmp/dbt-logs && "
+            f"{DBT_EXECUTABLE} test "
+            f"--project-dir {DBT_PROJECT_DIR} "
+            f"--target-path /tmp/airflow-dbt-target "
+            f"--profiles-dir {DBT_PROFILES_DIR} "
+            f"--select path:models/silver path:models/gold"
+        ),
+    )
+
+    prepare_dbt_profile >> run_silver_gold >> test_silver_gold
