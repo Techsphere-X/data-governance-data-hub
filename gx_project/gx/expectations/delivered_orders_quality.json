@@ -1,0 +1,19 @@
+{
+  "expectations": [
+    {
+      "id": "7168908f-6ca9-4abf-bcee-95237cfde853",
+      "kwargs": {
+        "column": "order_delivered_customer_at"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    }
+  ],
+  "id": "c97e0b1b-3ea7-4714-9134-9cc2fa8e4250",
+  "meta": {
+    "great_expectations_version": "1.24.1"
+  },
+  "name": "delivered_orders_quality",
+  "notes": null
+}

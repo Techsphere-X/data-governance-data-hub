@@ -1,0 +1,12 @@
+{
+  "actions": [],
+  "id": "199dfebf-a501-48b8-8b70-a5222ea7a902",
+  "name": "fact_orders_business_checkpoint",
+  "result_format": "SUMMARY",
+  "validation_definitions": [
+    {
+      "id": "2f73a647-369f-448b-b805-148ddd8d2433",
+      "name": "fact_orders_business_validation"
+    }
+  ]
+}

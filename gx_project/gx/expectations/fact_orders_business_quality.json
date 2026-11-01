@@ -1,0 +1,40 @@
+{
+  "expectations": [
+    {
+      "id": "595c6a21-6b6a-4fe8-9807-9463cf3e194c",
+      "kwargs": {
+        "column": "delivery_date_valid",
+        "value_set": [
+          true
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    },
+    {
+      "id": "6a6d8120-1118-4ad9-b347-c5e7e7612e45",
+      "kwargs": {
+        "column": "order_status",
+        "value_set": [
+          "approved",
+          "canceled",
+          "delivered",
+          "invoiced",
+          "processing",
+          "shipped",
+          "unavailable"
+        ]
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_in_set"
+    }
+  ],
+  "id": "5c885856-c8a2-4694-86b5-a77a0480d0d2",
+  "meta": {
+    "great_expectations_version": "1.24.1"
+  },
+  "name": "fact_orders_business_quality",
+  "notes": null
+}

@@ -1,0 +1,38 @@
+{
+  "expectations": [
+    {
+      "id": "933f0e6e-27c8-45bd-8b6e-01b96586a4db",
+      "kwargs": {
+        "column": "order_id"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    },
+    {
+      "id": "0a4da93b-a360-4cc6-a82b-6709353aa79f",
+      "kwargs": {
+        "column": "order_id"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_unique"
+    },
+    {
+      "id": "7b9fae7c-2c37-46ae-b785-b19e1d602cda",
+      "kwargs": {
+        "column": "total_order_value",
+        "min_value": 0.0
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_be_between"
+    }
+  ],
+  "id": "382d82f4-9661-4705-a73e-2b27144fd75b",
+  "meta": {
+    "great_expectations_version": "1.24.1"
+  },
+  "name": "fact_orders_quality",
+  "notes": null
+}

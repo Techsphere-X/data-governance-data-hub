@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "141afce2-abaf-4783-8ae0-25b7379ea423",
+      "name": "fact_orders_all"
+    },
+    "batch_definition": {
+      "id": "c5c2f18d-40fa-4c3d-9469-039d812a1d3e",
+      "name": "all_fact_orders"
+    },
+    "datasource": {
+      "id": "38ce0641-5ca7-45a6-91d7-6c3839aa59ee",
+      "name": "olist_postgres"
+    }
+  },
+  "id": "ec91ec45-6005-4116-bc30-43698fe0d11e",
+  "name": "fact_orders_validation",
+  "suite": {
+    "id": "382d82f4-9661-4705-a73e-2b27144fd75b",
+    "name": "fact_orders_quality"
+  }
+}

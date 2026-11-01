@@ -1,0 +1,145 @@
+# Welcome to Great Expectations! Always know what to expect from your data.
+#
+# Here you can define datasources, batch kwargs generators, integrations and
+# more. This file is intended to be committed to your repo. For help with
+# configuration please:
+#   - Read our docs: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview/#2-configure-your-datasource
+#   - Join our slack channel: http://greatexpectations.io/slack
+
+# config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
+# It is auto-generated and usually does not need to be changed.
+config_version: 4.0
+
+# This config file supports variable substitution which enables: 1) keeping
+# secrets out of source control & 2) environment-based configuration changes
+# such as staging vs prod.
+#
+# When GX encounters substitution syntax (like `my_key: ${my_value}` or
+# `my_key: $my_value`) in the great_expectations.yml file, it will attempt
+# to replace the value of `my_key` with the value from an environment
+# variable `my_value` or a corresponding key read from this config file,
+# which is defined through the `config_variables_file_path`.
+# Environment variables take precedence over variables defined here.
+#
+# Substitution values defined here can be a simple (non-nested) value,
+# nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})
+#
+#
+# https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+
+
+config_variables_file_path: uncommitted/config_variables.yml
+
+# The plugins_directory will be added to your python path for custom modules
+# used to override and extend Great Expectations.
+plugins_directory: plugins/
+
+stores:
+# Stores are configurable places to store things like Expectations, Validations
+# Data Docs, and more. These are for advanced users only - most users can simply
+# leave this section alone.
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+
+  validation_results_store:
+    class_name: ValidationResultsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      suppress_store_backend_id: true
+      base_directory: checkpoints/
+
+  validation_definition_store:
+    class_name: ValidationDefinitionStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: validation_definitions/
+
+expectations_store_name: expectations_store
+validation_results_store_name: validation_results_store
+checkpoint_store_name: checkpoint_store
+
+data_docs_sites:
+  # Data Docs make it simple to visualize data quality in your project. These
+  # include Expectations, Validations & Profiles. The are built for all
+  # Datasources from JSON artifacts in the local repo including validations &
+  # profiles from the uncommitted directory. Read more at https://docs.greatexpectations.io/docs/terms/data_docs
+  local_site:
+    class_name: SiteBuilder
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+fluent_datasources:
+  olist_postgres:
+    type: postgres
+    id: 38ce0641-5ca7-45a6-91d7-6c3839aa59ee
+    assets:
+      delivered_orders:
+        type: query
+        id: 349d2078-75b1-4a9d-9b6e-4c256ed4aed8
+        batch_metadata: {}
+        batch_definitions:
+          all_delivered_orders:
+            id: dee08d4b-ec16-41b0-9924-9c6bdca745a7
+            partitioner:
+        query: "\n        SELECT order_id, order_delivered_customer_at\n        FROM
+          analytics.fact_orders\n        WHERE order_status = 'delivered'\n    "
+      fact_orders_all:
+        type: query
+        id: 141afce2-abaf-4783-8ae0-25b7379ea423
+        batch_metadata: {}
+        batch_definitions:
+          all_fact_orders:
+            id: c5c2f18d-40fa-4c3d-9469-039d812a1d3e
+            partitioner:
+        query: "\n    SELECT\n        order_id,\n        total_order_value\n    FROM
+          analytics.fact_orders\n"
+      fact_orders_business_rules:
+        type: query
+        id: e333ad8c-6a42-4ea5-beb8-66c4b9e01161
+        batch_metadata: {}
+        batch_definitions:
+          all_fact_orders_business_rules:
+            id: f1f1e888-4f43-4455-9f91-9d56aa8bdf94
+            partitioner:
+        query: "\n        SELECT\n            order_id,\n            order_status,\n\
+          \            CASE\n                WHEN order_delivered_customer_at >= order_purchase_at\n\
+          \                THEN TRUE\n                ELSE FALSE\n            END
+          AS delivery_date_valid\n        FROM analytics.fact_orders\n        WHERE
+          order_delivered_customer_at IS NOT NULL\n    "
+      dim_customers_quality:
+        type: query
+        id: 2b8369bb-69ab-4522-85d1-30af0faccca1
+        batch_metadata: {}
+        batch_definitions:
+          all_dim_customers:
+            id: 60869c65-f9b9-455b-8a40-5274d0f1adee
+            partitioner:
+        query: "\n        SELECT\n            customer_id\n        FROM analytics.dim_customers\n\
+          \    "
+      supplier_shipments_quality:
+        type: query
+        id: f7579e7c-9024-4ed8-a1cd-55ffc852ba42
+        batch_metadata: {}
+        batch_definitions:
+          all_delivered_shipments:
+            id: c076f619-854e-4f43-8c88-a4dfdf80de77
+            partitioner:
+        query: "\n        SELECT\n            shipment_id,\n            shipment_status,\n\
+          \            actual_delivery_date\n        FROM analytics.fact_supplier_shipments\n\
+          \        WHERE shipment_status = 'Delivered'\n    "
+    connection_string: 
+      postgresql+psycopg2://governance:governance_dev@localhost:5433/governance
+analytics_enabled:
+data_context_id: f54a2788-de2f-4aa4-beb1-27d4e8107ac8

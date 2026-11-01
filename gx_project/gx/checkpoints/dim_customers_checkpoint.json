@@ -1,0 +1,12 @@
+{
+  "actions": [],
+  "id": "04baf68f-5f5a-4776-a7ce-256f7e4b1cd7",
+  "name": "dim_customers_checkpoint",
+  "result_format": "SUMMARY",
+  "validation_definitions": [
+    {
+      "id": "ff534fef-1d67-4e9a-8bb5-aeb9d930d35a",
+      "name": "dim_customers_validation"
+    }
+  ]
+}

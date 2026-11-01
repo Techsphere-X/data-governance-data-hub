@@ -1,0 +1,22 @@
+{
+  "data": {
+    "asset": {
+      "id": "2b8369bb-69ab-4522-85d1-30af0faccca1",
+      "name": "dim_customers_quality"
+    },
+    "batch_definition": {
+      "id": "60869c65-f9b9-455b-8a40-5274d0f1adee",
+      "name": "all_dim_customers"
+    },
+    "datasource": {
+      "id": "38ce0641-5ca7-45a6-91d7-6c3839aa59ee",
+      "name": "olist_postgres"
+    }
+  },
+  "id": "ff534fef-1d67-4e9a-8bb5-aeb9d930d35a",
+  "name": "dim_customers_validation",
+  "suite": {
+    "id": "dbf58952-7939-40bd-bbf9-3b330e917705",
+    "name": "dim_customers_quality"
+  }
+}

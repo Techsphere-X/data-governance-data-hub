@@ -1,0 +1,12 @@
+{
+  "actions": [],
+  "id": "c73bcdf0-6c29-4e19-931a-ffc64a71ab82",
+  "name": "fact_supplier_shipments_checkpoint",
+  "result_format": "SUMMARY",
+  "validation_definitions": [
+    {
+      "id": "3ed28aa8-d054-423c-991d-1b8eb82431a5",
+      "name": "fact_supplier_shipments_validation"
+    }
+  ]
+}

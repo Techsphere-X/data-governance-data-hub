@@ -1,0 +1,19 @@
+{
+  "expectations": [
+    {
+      "id": "05d39377-9f97-4308-ba9b-68668b0f9b3d",
+      "kwargs": {
+        "column": "customer_id"
+      },
+      "meta": {},
+      "severity": "critical",
+      "type": "expect_column_values_to_not_be_null"
+    }
+  ],
+  "id": "dbf58952-7939-40bd-bbf9-3b330e917705",
+  "meta": {
+    "great_expectations_version": "1.24.1"
+  },
+  "name": "dim_customers_quality",
+  "notes": null
+}

@@ -26,3 +26,8 @@ Thumbs.db
 /airflow/simple_auth_manager_passwords.json
 
 data/incoming/*.csv
+
+# Great Expectations virtual environment
+.venv-gx/
+gx_project/gx/expectations/.ge_store_backend_id
+great_expectations/uncommitted/
