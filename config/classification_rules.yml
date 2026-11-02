@@ -1,0 +1,198 @@
+
+approved_tags:
+  - Customer Data
+  - Derived
+  - Financial
+  - Identifier
+  - Supplier Data
+  - Weather Data
+
+models:
+
+  # STAGING
+
+  stg_customers:
+    tags: [Customer Data]
+    columns:
+      customer_id: [Customer Data, Identifier]
+      customer_unique_id: [Customer Data, Identifier]
+      customer_zip_code_prefix: [Customer Data]
+      customer_city: [Customer Data]
+      customer_state: [Customer Data]
+
+  stg_order_items:
+    tags: [Financial]
+    columns:
+      order_id: [Identifier]
+      order_item_id: [Identifier]
+      product_id: [Identifier]
+      seller_id: [Identifier]
+      price: [Financial]
+      freight_value: [Financial]
+
+  stg_order_payments:
+    tags: [Financial]
+    columns:
+      order_id: [Identifier]
+      payment_record_number: [Identifier]
+      payment_amount: [Financial]
+
+  stg_orders:
+    tags: []
+    columns:
+      order_id: [Identifier]
+      customer_id: [Customer Data, Identifier]
+
+  stg_product_categories:
+    tags: []
+    columns: {}
+
+  stg_products:
+    tags: []
+    columns:
+      product_id: [Identifier]
+
+  stg_supplier_shipments:
+    tags: [Supplier Data]
+    columns:
+      shipment_id: [Supplier Data, Identifier]
+      product_id: [Identifier]
+      supplier_id: [Supplier Data, Identifier]
+      shipment_date: [Supplier Data]
+      quantity: [Supplier Data]
+      expected_delivery_date: [Supplier Data]
+      actual_delivery_date: [Supplier Data]
+      shipment_status: [Supplier Data]
+      updated_at: [Supplier Data]
+
+  stg_weather_sao:
+    tags: [Weather Data]
+    columns: {}
+
+  stg_weather_rio:
+    tags: [Weather Data]
+    columns: {}
+
+  stg_weather_belo_horizonte:
+    tags: [Weather Data]
+    columns: {}
+
+  stg_weather_curitiba:
+    tags: [Weather Data]
+    columns: {}
+
+  # INTERMEDIATE
+
+  int_order_items:
+    tags: [Financial, Derived]
+    columns:
+      order_id: [Identifier]
+      order_item_id: [Identifier]
+      product_id: [Identifier]
+      seller_id: [Identifier]
+      customer_id: [Customer Data, Identifier]
+      price: [Financial]
+      freight_value: [Financial]
+      item_revenue: [Financial, Derived]
+
+  int_order_payments:
+    tags: [Financial]
+    columns:
+      order_id: [Identifier]
+      payment_record_number: [Identifier]
+      payment_amount: [Financial]
+
+  int_order_payment_value:
+    tags: [Financial, Derived]
+    columns:
+      order_id: [Identifier]
+      total_order_value: [Financial, Derived]
+
+  int_supplier_shipments:
+    tags: [Supplier Data, Derived]
+    columns:
+      shipment_id: [Supplier Data, Identifier]
+      product_id: [Identifier]
+      supplier_id: [Supplier Data, Identifier]
+      shipment_date: [Supplier Data]
+      quantity: [Supplier Data]
+      expected_delivery_date: [Supplier Data]
+      actual_delivery_date: [Supplier Data]
+      shipment_status: [Supplier Data]
+      updated_at: [Supplier Data]
+      delivery_days: [Supplier Data, Derived]
+      delay_days: [Supplier Data, Derived]
+      is_delivered: [Supplier Data, Derived]
+      is_status_delayed: [Supplier Data, Derived]
+      is_date_delayed: [Supplier Data, Derived]
+      is_delayed: [Supplier Data, Derived]
+      is_on_time: [Supplier Data, Derived]
+
+  # MART
+
+  dim_customers:
+    tags: [Customer Data]
+    columns:
+      customer_id: [Customer Data, Identifier]
+      customer_unique_id: [Customer Data, Identifier]
+      customer_zip_code_prefix: [Customer Data]
+      customer_city: [Customer Data]
+      customer_state: [Customer Data]
+
+  fact_orders:
+    tags: [Financial, Derived]
+    columns:
+      order_id: [Identifier]
+      customer_id: [Customer Data, Identifier]
+      item_count: [Derived]
+      total_price: [Financial, Derived]
+      total_freight_value: [Financial, Derived]
+      total_order_value: [Financial, Derived]
+      delivery_days: [Derived]
+      delivery_delay_days: [Derived]
+      is_late: [Derived]
+
+  fact_payments:
+    tags: [Financial]
+    columns:
+      order_id: [Identifier]
+      payment_record_number: [Identifier]
+      payment_amount: [Financial]
+
+  fact_supplier_shipments:
+    tags: [Supplier Data, Derived]
+    columns:
+      shipment_id: [Supplier Data, Identifier]
+      product_id: [Identifier]
+      supplier_id: [Supplier Data, Identifier]
+      shipment_date: [Supplier Data]
+      quantity: [Supplier Data]
+      expected_delivery_date: [Supplier Data]
+      actual_delivery_date: [Supplier Data]
+      shipment_status: [Supplier Data]
+      delivery_days: [Supplier Data, Derived]
+      delay_days: [Supplier Data, Derived]
+      is_delivered: [Supplier Data, Derived]
+      is_status_delayed: [Supplier Data, Derived]
+      is_date_delayed: [Supplier Data, Derived]
+      is_delayed: [Supplier Data, Derived]
+      is_on_time: [Supplier Data, Derived]
+
+  fact_orders_weather:
+    tags: [Customer Data, Financial, Derived, Weather Data]
+    columns:
+      order_id: [Identifier]
+      customer_id: [Customer Data, Identifier]
+      item_count: [Derived]
+      total_price: [Financial, Derived]
+      total_freight_value: [Financial, Derived]
+      total_order_value: [Financial, Derived]
+      delivery_days: [Derived]
+      delivery_delay_days: [Derived]
+      is_late: [Derived]
+      customer_city: [Customer Data]
+      customer_state: [Customer Data]
+      weather_station: [Weather Data]
+      precipitation: [Weather Data]
+      average_temperature: [Weather Data]
+      minimum_temperature: [Weather Data]

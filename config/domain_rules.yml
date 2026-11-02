@@ -1,0 +1,36 @@
+approved_domains:
+  - Customers
+  - Payments
+  - Products
+  - Sales
+  - Supplier
+  - Weather
+
+models:
+
+  # STAGING
+  stg_customers: Customers
+  stg_order_items: Products
+  stg_order_payments: Payments
+  stg_orders: Sales
+  stg_product_categories: Products
+  stg_products: Products
+  stg_supplier_shipments: Supplier
+
+  stg_weather_sao: Weather
+  stg_weather_rio: Weather
+  stg_weather_belo_horizonte: Weather
+  stg_weather_curitiba: Weather
+
+  # INTERMEDIATE
+  int_order_items: Products
+  int_order_payments: Payments
+  int_order_payment_value: Payments
+  int_supplier_shipments: Supplier
+
+  # MART
+  dim_customers: Customers
+  fact_orders: Sales
+  fact_payments: Payments
+  fact_supplier_shipments: Supplier
+  fact_orders_weather: Weather

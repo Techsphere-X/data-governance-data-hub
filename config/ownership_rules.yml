@@ -1,0 +1,85 @@
+models:
+  # MART LAYER
+  fact_orders_weather:
+    - type: Business Owner
+      group: Analytics Team
+
+  fact_supplier_shipments:
+    - type: Business Owner
+      group: Analytics Team
+
+  dim_customers:
+    - type: Business Owner
+      group: Customer Data Team
+
+  fact_orders:
+    - type: Business Owner
+      group: Analytics Team
+
+  fact_payments:
+    - type: Business Owner
+      group: Payments Team
+
+  # INTERMEDIATE LAYER
+  int_order_payments:
+    - type: Business Owner
+      group: Payments Team
+
+  int_order_payment_value:
+    - type: Business Owner
+      group: Payments Team
+
+  int_order_items:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  int_supplier_shipments:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  # STAGING LAYER
+  stg_weather_sao:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_weather_rio:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_weather_belo_horizonte:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_weather_curitiba:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_products:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_orders:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_order_items:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_supplier_shipments:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_product_categories:
+    - type: Technical Owner
+      group: Data Engineering Team
+
+  stg_order_payments:
+    - type: Technical Owner
+      group: Data Engineering Team
+    - type: Technical Owner
+      group: Payments Team
+
+  stg_customers:
+    - type: Technical Owner
+      group: Customer Data Team
