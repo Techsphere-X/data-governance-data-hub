@@ -1,0 +1,385 @@
+settings:
+  database: governance
+  schema: analytics
+  environment: PROD
+  platform: dbt
+
+checks:
+  glossary_term_validity: true
+  model_glossary_coverage: true
+  business_term_relevance: true
+  column_glossary_relevance: true
+  required_glossary_assignment: true
+  no_irrelevant_glossary_terms: true
+  consistent_glossary_usage: true
+  glossary_definition_completeness: true
+
+models:
+
+  # ==========================================
+  # STAGING
+  # ==========================================
+
+  stg_customers:
+    required_terms: [Customer]
+    columns:
+      customer_id:
+        required_terms: [Customer]
+      customer_unique_id:
+        required_terms: [Customer]
+
+  stg_order_items:
+    required_terms: [Product Sales, Item Revenue]
+    columns:
+      order_id:
+        required_terms: [Order]
+      product_id:
+        required_terms: []
+        forbidden_terms: [Product Sales]
+      seller_id:
+        required_terms: []
+        forbidden_terms: [Product Sales]
+      price:
+        required_terms: [Item Revenue]
+      freight_value:
+        required_terms: [Freight Cost]
+
+  stg_order_payments:
+    required_terms:
+      - Payment
+      - Payment Amount
+      - Payment Method
+      - Installment Count
+    columns:
+      order_id:
+        required_terms: [Order]
+      payment_record_number:
+        required_terms: []
+      payment_amount:
+        required_terms: [Payment Amount]
+      payment_type:
+        required_terms: [Payment Method]
+      installment_count:
+        required_terms: [Installment Count]
+
+  stg_orders:
+    required_terms:
+      - Order
+      - Order Status
+      - Delivery Time
+      - Delivery Delay
+    columns:
+      order_id:
+        required_terms: [Order]
+      customer_id:
+        required_terms: [Customer]
+      order_status:
+        required_terms: [Order Status]
+      order_purchase_at:
+        required_terms: [Order]
+      order_delivered_carrier_at:
+        required_terms: [Delivery Time]
+      order_delivered_customer_at:
+        required_terms: [Delivery Time]
+      order_estimated_delivery_at:
+        required_terms: [Delivery Time]
+
+  stg_product_categories:
+    required_terms: [Product Category]
+    columns:
+      product_category_name:
+        required_terms: [Product Category]
+      product_category_name_english:
+        required_terms: [Product Category]
+
+  stg_products:
+    required_terms: [Product Category]
+    columns:
+      product_id:
+        required_terms: []
+        forbidden_terms: [Product Category]
+      product_category_name:
+        required_terms: [Product Category]
+
+  stg_supplier_shipments:
+    required_terms:
+      - Supplier Shipment
+      - Freight Cost
+      - Delivery Performance
+    columns:
+      shipment_id:
+        required_terms: [Supplier Shipment]
+      supplier_id:
+        required_terms: [Supplier Shipment]
+      expected_delivery_date:
+        required_terms: [Delivery Time]
+      actual_delivery_date:
+        required_terms: [Delivery Time]
+      shipment_status:
+        required_terms: [Delivery Performance]
+
+  stg_weather_sao:
+    required_terms:
+      - Average Temperature
+      - Weather Station
+      - Weather Observation
+      - Precipitation
+    columns:
+      weather_date:
+        required_terms: [Weather Observation]
+      station:
+        required_terms: [Weather Station]
+
+  stg_weather_rio:
+    required_terms:
+      - Average Temperature
+      - Weather Station
+      - Weather Observation
+      - Precipitation
+    columns:
+      weather_date:
+        required_terms: [Weather Observation]
+      station:
+        required_terms: [Weather Station]
+
+  stg_weather_belo_horizonte:
+    required_terms:
+      - Average Temperature
+      - Weather Station
+      - Weather Observation
+      - Precipitation
+    columns:
+      weather_date:
+        required_terms: [Weather Observation]
+      station:
+        required_terms: [Weather Station]
+
+  stg_weather_curitiba:
+    required_terms:
+      - Average Temperature
+      - Weather Station
+      - Weather Observation
+      - Precipitation
+    columns:
+      weather_date:
+        required_terms: [Weather Observation]
+      station:
+        required_terms: [Weather Station]
+
+  # ==========================================
+  # INTERMEDIATE
+  # ==========================================
+
+  int_order_items:
+    required_terms:
+      - Order
+      - Product Sales
+      - Item Revenue
+      - Product Category
+    columns:
+      order_id:
+        required_terms: [Order]
+      product_id:
+        required_terms: []
+        forbidden_terms: [Product Sales]
+      seller_id:
+        required_terms: []
+        forbidden_terms: [Product Sales]
+      customer_id:
+        required_terms: [Customer]
+      item_revenue:
+        required_terms: [Item Revenue]
+      price:
+        required_terms: [Item Revenue]
+      freight_value:
+        required_terms: [Freight Cost]
+      product_category_name:
+        required_terms: [Product Category]
+      product_category_name_english:
+        required_terms: [Product Category]
+
+  int_order_payments:
+    required_terms:
+      - Order
+      - Payment
+      - Payment Amount
+      - Payment Method
+      - Installment Count
+    columns:
+      order_id:
+        required_terms: [Order]
+      payment_record_number:
+        required_terms: [Payment]
+      payment_amount:
+        required_terms: [Payment Amount]
+      payment_type:
+        required_terms: [Payment Method]
+      installment_count:
+        required_terms: [Installment Count]
+
+  int_order_payment_value:
+    required_terms:
+      - Order
+      - Payment
+      - Payment Amount
+      - Total Order Value
+    columns:
+      order_id:
+        required_terms: [Order]
+      total_order_value:
+        required_terms: [Total Order Value]
+      payment_type:
+        required_terms: [Payment Method]
+
+  int_supplier_shipments:
+    required_terms:
+      - Supplier Shipment
+      - Freight Cost
+      - Delivery Time
+      - Delivery Delay
+      - Late Delivery
+      - On-Time Delivery
+      - Delivery Performance
+    columns:
+      shipment_id:
+        required_terms: [Supplier Shipment]
+      supplier_id:
+        required_terms: [Supplier Shipment]
+      shipment_status:
+        required_terms: [Delivery Performance]
+      delivery_days:
+        required_terms: [Delivery Time]
+      delay_days:
+        required_terms: [Delivery Delay]
+      is_delayed:
+        required_terms: [Late Delivery]
+      is_on_time:
+        required_terms: [On-Time Delivery]
+
+  # ==========================================
+  # MARTS
+  # ==========================================
+
+  dim_customers:
+    required_terms: [Customer]
+    columns:
+      customer_id:
+        required_terms: [Customer]
+      customer_unique_id:
+        required_terms: [Customer]
+
+  fact_orders:
+    required_terms:
+      - Order
+      - Customer
+      - Order Status
+      - Total Order Value
+      - Item Revenue
+      - Product Sales
+      - Delivery Time
+      - Delivery Delay
+      - Late Delivery
+      - On-Time Delivery
+      - Delivery Performance
+    columns:
+      order_id:
+        required_terms: [Order]
+      customer_id:
+        required_terms: [Customer]
+      total_price:
+        required_terms: [Product Sales]
+      total_freight_value:
+        required_terms: [Freight Cost]
+      total_order_value:
+        required_terms: [Total Order Value]
+      delivery_days:
+        required_terms: [Delivery Time]
+      delivery_delay_days:
+        required_terms: [Delivery Delay]
+      is_late:
+        required_terms: [Late Delivery]
+      order_status:
+        required_terms: [Order Status]
+      order_purchase_at:
+        required_terms: [Order]
+      order_delivered_customer_at:
+        required_terms: [Delivery Time]
+      order_estimated_delivery_at:
+        required_terms: [Delivery Time]
+
+  fact_payments:
+    required_terms:
+      - Payment
+      - Payment Amount
+      - Payment Method
+      - Installment Count
+    columns:
+      order_id:
+        required_terms: [Order]
+      payment_record_number:
+        required_terms: []
+      payment_amount:
+        required_terms: [Payment Amount]
+      payment_type:
+        required_terms: [Payment Method]
+      installment_count:
+        required_terms: [Installment Count]
+
+  fact_supplier_shipments:
+    required_terms:
+      - Supplier Shipment
+      - Freight Cost
+      - Delivery Time
+      - Delivery Delay
+      - Late Delivery
+      - On-Time Delivery
+      - Delivery Performance
+    columns:
+      shipment_id:
+        required_terms: [Supplier Shipment]
+      supplier_id:
+        required_terms: [Supplier Shipment]
+      shipment_status:
+        required_terms: [Delivery Performance]
+      delivery_days:
+        required_terms: [Delivery Time]
+      delay_days:
+        required_terms: [Delivery Delay]
+      is_on_time:
+        required_terms: [On-Time Delivery]
+      is_delayed:
+        required_terms: [Late Delivery]
+
+  fact_orders_weather:
+    required_terms:
+      - Order
+      - Weather Observation
+      - Weather Station
+      - Average Temperature
+      - Precipitation
+      - Delivery Performance
+    columns:
+      order_id:
+        required_terms: [Order]
+      customer_id:
+        required_terms: [Customer]
+      total_price:
+        required_terms: [Product Sales]
+      total_freight_value:
+        required_terms: [Freight Cost]
+      total_order_value:
+        required_terms: [Total Order Value]
+      delivery_days:
+        required_terms: [Delivery Time]
+      delivery_delay_days:
+        required_terms: [Delivery Delay]
+      is_late:
+        required_terms: [Late Delivery]
+      weather_station:
+        required_terms: [Weather Station]
+      precipitation:
+        required_terms: [Precipitation]
+      average_temperature:
+        required_terms: [Average Temperature]
+      weather_date:
+        required_terms: [Weather Observation]

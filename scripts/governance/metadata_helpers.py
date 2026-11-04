@@ -14,20 +14,15 @@ query GovernanceDatasetLookup($query: String!) {
             entity {
                 urn
                 ... on Dataset {
+                    name
                     properties {
                         name
-                    }
-                    globalTags {
-                        tags {
-                            tag {
-                                urn
-                                name
-                            }
-                        }
+                        description
                     }
                     schemaMetadata {
                         fields {
                             fieldPath
+                            description
                             tags {
                                 tags {
                                     tag {
@@ -41,6 +36,7 @@ query GovernanceDatasetLookup($query: String!) {
                     editableSchemaMetadata {
                         editableSchemaFieldInfo {
                             fieldPath
+                            description
                             tags {
                                 tags {
                                     tag {
@@ -48,6 +44,14 @@ query GovernanceDatasetLookup($query: String!) {
                                         name
                                     }
                                 }
+                            }
+                        }
+                    }
+                    globalTags {
+                        tags {
+                            tag {
+                                urn
+                                name
                             }
                         }
                     }
@@ -81,8 +85,16 @@ def extract_tag_names(global_tags):
 
 
 def get_dataset_metadata(client, model_name):
-    """Retrieve model-level tags, column-level tags, and domain."""
-    data = client.execute(DATASET_QUERY, {"query": model_name})
+    """
+    Retrieve metadata from the dbt dataset only.
+
+    PostgreSQL entities with the same model name are ignored.
+    """
+
+    data = client.execute(
+        DATASET_QUERY,
+        {"query": model_name},
+    )
 
     results = data.get("searchAcrossEntities", {}).get("searchResults", [])
 
@@ -90,26 +102,53 @@ def get_dataset_metadata(client, model_name):
 
     for result in results:
         entity = result.get("entity") or {}
-        properties = entity.get("properties") or {}
+        urn = entity.get("urn", "")
 
-        if properties.get(
-            "name"
-        ) == model_name and "urn:li:dataPlatform:dbt" in entity.get("urn", ""):
+        properties = entity.get("properties") or {}
+        entity_name = entity.get("name") or properties.get("name")
+
+        if entity_name == model_name and "urn:li:dataPlatform:dbt" in urn:
             dataset = entity
             break
 
     if not dataset:
-        raise LookupError(f"dbt dataset not found: {model_name}")
+        raise LookupError(f"dbt dataset not found in DataHub: {model_name}")
+
+    properties = dataset.get("properties") or {}
+
+    # Model description
+    model_description = properties.get("description")
+
+    # Column descriptions from schemaMetadata
+    column_descriptions = {}
+
+    schema = dataset.get("schemaMetadata") or {}
+
+    for field in schema.get("fields", []):
+        field_path = field.get("fieldPath")
+
+        if field_path:
+            column_descriptions[field_path] = field.get("description")
+
+    # Editable schema metadata is a fallback for descriptions.
+    editable_schema = dataset.get("editableSchemaMetadata") or {}
+
+    editable_fields = editable_schema.get("editableSchemaFieldInfo", [])
+
+    for field in editable_fields:
+        field_path = field.get("fieldPath")
+
+        if field_path:
+            editable_description = field.get("description")
+
+            if not column_descriptions.get(field_path) and editable_description:
+                column_descriptions[field_path] = editable_description
 
     # Model-level tags
     model_tags = extract_tag_names(dataset.get("globalTags"))
 
-    # Column-level tags:
-    # DataHub UI-edited column tags are stored in editableSchemaMetadata.
+    # Column-level tags
     column_tags = {}
-
-    editable_schema = dataset.get("editableSchemaMetadata") or {}
-    editable_fields = editable_schema.get("editableSchemaFieldInfo") or []
 
     for field in editable_fields:
         field_path = field.get("fieldPath")
@@ -117,16 +156,13 @@ def get_dataset_metadata(client, model_name):
         if field_path:
             column_tags[field_path] = extract_tag_names(field.get("tags"))
 
-    # Also read schemaMetadata tags as a fallback.
-    # Merge them with editable tags if the same column appears in both.
-    schema = dataset.get("schemaMetadata") or {}
-
     for field in schema.get("fields", []):
         field_path = field.get("fieldPath")
 
         if field_path:
             existing_tags = column_tags.get(field_path, set())
             schema_tags = extract_tag_names(field.get("tags"))
+
             column_tags[field_path] = existing_tags | schema_tags
 
     # Domain
@@ -137,6 +173,8 @@ def get_dataset_metadata(client, model_name):
     return {
         "urn": dataset["urn"],
         "name": model_name,
+        "description": model_description,
+        "column_descriptions": column_descriptions,
         "tags": model_tags,
         "column_tags": column_tags,
         "domain": domain_properties.get("name"),

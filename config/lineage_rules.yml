@@ -1,0 +1,102 @@
+framework: lineage_governance
+
+settings:
+  platform: dbt
+  lineage_platform: postgres
+  database: governance
+  schema: analytics
+  environment: PROD
+  direct_lineage_degree: 2
+  lineage_result_limit: 100
+
+checks:
+  upstream_completeness: true
+  downstream_completeness: true
+  unexpected_dependencies: true
+  lineage_continuity: true
+  layer_connectivity: true
+
+models:
+  stg_customers:
+    layer: staging
+    upstream: []
+  stg_order_items:
+    layer: staging
+    upstream: []
+  stg_order_payments:
+    layer: staging
+    upstream: []
+  stg_orders:
+    layer: staging
+    upstream: []
+  stg_product_categories:
+    layer: staging
+    upstream: []
+  stg_products:
+    layer: staging
+    upstream: []
+  stg_supplier_shipments:
+    layer: staging
+    upstream: []
+  stg_weather_sao:
+    layer: staging
+    upstream: []
+  stg_weather_rio:
+    layer: staging
+    upstream: []
+  stg_weather_belo_horizonte:
+    layer: staging
+    upstream: []
+  stg_weather_curitiba:
+    layer: staging
+    upstream: []
+
+  int_order_items:
+    layer: intermediate
+    upstream:
+      - stg_order_items
+      - stg_orders
+      - stg_products
+      - stg_product_categories
+  int_order_payment_value:
+    layer: intermediate
+    upstream:
+      - int_order_payments
+      - int_order_items
+  int_order_payments:
+    layer: intermediate
+    upstream:
+      - stg_order_payments
+      - stg_orders
+  int_supplier_shipments:
+    layer: intermediate
+    upstream:
+      - stg_supplier_shipments
+
+  dim_customers:
+    layer: mart
+    upstream:
+      - stg_customers
+  fact_orders:
+    layer: mart
+    upstream:
+      - int_order_items
+  fact_payments:
+    layer: mart
+    upstream:
+      - int_order_payments
+  fact_supplier_shipments:
+    layer: mart
+    upstream:
+      - int_supplier_shipments
+      - stg_products
+      - stg_product_categories
+  fact_orders_weather:
+    layer: mart
+    upstream:
+      - fact_orders
+      - dim_customers
+      - stg_weather_sao
+      - stg_weather_rio
+      - stg_weather_belo_horizonte
+      - stg_weather_curitiba

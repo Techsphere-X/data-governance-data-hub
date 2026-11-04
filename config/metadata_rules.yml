@@ -1,0 +1,77 @@
+settings:
+  database: governance
+  schema: analytics
+  environment: PROD
+
+checks:
+  model_description_completeness: true
+  column_description_completeness: true
+  model_naming_convention: true
+
+naming:
+  pattern: "^(stg|int|dim|fact)_[a-z0-9]+(?:_[a-z0-9]+)*$"
+
+models:
+
+  # Staging models
+  stg_customers:
+    layer: staging
+
+  stg_order_items:
+    layer: staging
+
+  stg_order_payments:
+    layer: staging
+
+  stg_orders:
+    layer: staging
+
+  stg_product_categories:
+    layer: staging
+
+  stg_products:
+    layer: staging
+
+  stg_supplier_shipments:
+    layer: staging
+
+  stg_weather_sao:
+    layer: staging
+
+  stg_weather_rio:
+    layer: staging
+
+  stg_weather_belo_horizonte:
+    layer: staging
+
+  stg_weather_curitiba:
+    layer: staging
+
+  # Intermediate models
+  int_order_items:
+    layer: intermediate
+
+  int_order_payments:
+    layer: intermediate
+
+  int_order_payment_value:
+    layer: intermediate
+
+  int_supplier_shipments:
+    layer: intermediate
+
+  # Mart models
+  dim_customers:
+    layer: mart
+
+  fact_orders:
+    layer: mart
+
+  fact_payments:
+    layer: mart
+
+  fact_supplier_shipments:
+    layer: mart
+
+  fact_orders_weather:
+    layer: mart
