@@ -108,3 +108,6 @@ models:
       - name: updated_at
         description: "Timestamp when the supplier shipment record was last updated."
 
+      - name: product_category_name_english
+        description: "English translation of the product category associated with the shipped product."
+

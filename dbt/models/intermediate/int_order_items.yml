@@ -1,62 +1,97 @@
 version: 2
 
 models:
-
   - name: int_order_items
-
     description: >
-      Order-item level model enriched with order, product, and product category
-      information. Calculates item revenue from the item price and freight value.
-      Grain: one row per combination of order_id and order_item_id.
-
-
-    columns:
-
-      - name: order_id
-        description: "Identifier of the order containing the item."
-
-      - name: order_item_id
-        description: "Sequence number identifying the item within an order."
-
-      - name: product_id
-        description: "Identifier of the product."
-
-      - name: product_category_name_english
-        description: "English product category name."
-
-      - name: price
-        description: "Price of the product item, excluding freight."
-
-      - name: freight_value
-        description: "Freight value associated with the product item."
-
-      - name: item_revenue
-        description: "Product price plus freight value for the order item."
+      Intermediate model combining order item details with customer,
+      product, category, seller, and order information.
+      It provides item-level revenue and freight information for
+      downstream sales analysis.
+      Grain: one row per order item.
 
     meta:
-
       metrics:
-
         total_revenue:
           type: sum
           sql: ${item_revenue}
+          label: "Total Revenue"
+          description: "Total revenue generated from all order items."
 
         total_items:
           type: count
           sql: ${order_item_id}
+          label: "Total Items"
+          description: "Total number of order items."
 
         average_item_value:
           type: average
           sql: ${item_revenue}
+          label: "Average Item Value"
+          description: "Average revenue generated per order item."
 
         total_freight:
           type: sum
           sql: ${freight_value}
+          label: "Total Freight"
+          description: "Total freight cost across all order items."
 
         average_freight:
           type: average
           sql: ${freight_value}
+          label: "Average Freight"
+          description: "Average freight cost per order item."
 
         total_orders:
           type: count_distinct
           sql: ${order_id}
+          label: "Total Orders"
+          description: "Total number of distinct orders."
+
+    columns:
+      - name: order_id
+        description: "Unique identifier of the order."
+
+      - name: order_item_id
+        description: "Sequential identifier of an item within an order."
+
+      - name: product_id
+        description: "Unique identifier of the product purchased."
+
+      - name: product_category_name_english
+        description: "English name of the product category."
+
+      - name: price
+        description: "Price of the individual product."
+
+      - name: freight_value
+        description: "Freight cost associated with the order item."
+
+      - name: item_revenue
+        description: "Total item revenue calculated from product price and freight value."
+
+      - name: customer_id
+        description: "Unique identifier of the customer who placed the order."
+
+      - name: order_approved_at
+        description: "Timestamp when the order payment was approved."
+
+      - name: order_delivered_carrier_at
+        description: "Timestamp when the order was handed over to the carrier."
+
+      - name: order_delivered_customer_at
+        description: "Timestamp when the order was delivered to the customer."
+
+      - name: order_estimated_delivery_at
+        description: "Estimated delivery timestamp for the order."
+
+      - name: order_purchase_at
+        description: "Timestamp when the customer placed the order."
+
+      - name: order_status
+        description: "Current status of the order, such as delivered or shipped."
+
+      - name: product_category_name
+        description: "Original product category name from the source data."
+
+      - name: seller_id
+        description: "Unique identifier of the seller responsible for the product."

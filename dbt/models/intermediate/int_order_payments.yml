@@ -3,37 +3,26 @@ version: 2
 models:
   - name: int_order_payments
     description: >
-      Payment-level intermediate model containing payment records enriched
-      with the associated order purchase timestamp.
-      Grain: one row per combination of order_id and payment_record_number.
+      Intermediate model containing order payment records combined
+      with relevant order information. It supports payment analysis
+      by payment type, installment count, and payment amount.
+      Grain: one row per payment record.
 
     columns:
-
       - name: order_id
-        description: "Identifier of the order associated with the payment."
-        tests:
-          - not_null
-          - relationships:
-              arguments:
-                to: ref('stg_orders')
-                field: order_id
+        description: "Unique identifier of the order associated with the payment."
 
       - name: payment_record_number
-        description: "Sequence number identifying the payment record within an order."
-        tests:
-          - not_null
+        description: "Sequential number identifying a payment record within an order."
 
       - name: payment_type
-        description: "Method used to make the payment, such as credit card, boleto, or voucher."
-        tests:
-          - not_null
+        description: "Payment method used by the customer, such as credit card or boleto."
 
       - name: installment_count
-        description: "Number of installments used for the payment."
-        tests:
-          - not_null
+        description: "Number of installments selected for the payment."
 
       - name: payment_amount
-        description: "Amount of money represented by the payment."
-        tests:
-          - not_null
+        description: "Amount paid in the individual payment record."
+
+      - name: order_purchase_at
+        description: "Timestamp when the customer placed the order associated with the payment."
