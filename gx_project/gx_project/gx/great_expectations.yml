@@ -83,35 +83,36 @@ data_docs_sites:
 fluent_datasources:
   olist_postgres:
     type: postgres
-    id: 38ce0641-5ca7-45a6-91d7-6c3839aa59ee
+    id: f3cd3f10-883c-4cc6-b3bc-d498ac2ef23b
     assets:
       delivered_orders:
         type: query
-        id: 349d2078-75b1-4a9d-9b6e-4c256ed4aed8
+        id: 11da8e9b-c41c-45a4-94b8-63f411b2e13f
         batch_metadata: {}
         batch_definitions:
           all_delivered_orders:
-            id: dee08d4b-ec16-41b0-9924-9c6bdca745a7
+            id: a4f1cb61-817d-4148-ae2f-548d3296d14d
             partitioner:
-        query: "\n        SELECT order_id, order_delivered_customer_at\n        FROM
-          analytics.fact_orders\n        WHERE order_status = 'delivered'\n    "
+        query: "\n        SELECT\n            order_id,\n            order_delivered_customer_at\n\
+          \        FROM analytics.fact_orders\n        WHERE order_status = 'delivered'\n\
+          \    "
       fact_orders_all:
         type: query
-        id: 141afce2-abaf-4783-8ae0-25b7379ea423
+        id: 0ba8e014-c53b-4f41-96cb-35c507e86363
         batch_metadata: {}
         batch_definitions:
           all_fact_orders:
-            id: c5c2f18d-40fa-4c3d-9469-039d812a1d3e
+            id: 51e653f9-ae6e-43ef-bbff-e1f303b5e4fe
             partitioner:
-        query: "\n    SELECT\n        order_id,\n        total_order_value\n    FROM
-          analytics.fact_orders\n"
+        query: "\n        SELECT\n            order_id,\n            total_order_value\n\
+          \        FROM analytics.fact_orders\n    "
       fact_orders_business_rules:
         type: query
-        id: e333ad8c-6a42-4ea5-beb8-66c4b9e01161
+        id: cf5c32c9-1964-434a-a9f0-394dedd5044a
         batch_metadata: {}
         batch_definitions:
           all_fact_orders_business_rules:
-            id: f1f1e888-4f43-4455-9f91-9d56aa8bdf94
+            id: b2205e2a-ff6d-409d-b127-60fd362f4cfb
             partitioner:
         query: "\n        SELECT\n            order_id,\n            order_status,\n\
           \            CASE\n                WHEN order_delivered_customer_at >= order_purchase_at\n\
@@ -120,21 +121,21 @@ fluent_datasources:
           order_delivered_customer_at IS NOT NULL\n    "
       dim_customers_quality:
         type: query
-        id: 2b8369bb-69ab-4522-85d1-30af0faccca1
+        id: 6e370662-4e6b-47d5-97c9-8e92cc29daeb
         batch_metadata: {}
         batch_definitions:
           all_dim_customers:
-            id: 60869c65-f9b9-455b-8a40-5274d0f1adee
+            id: 3b2c4fc8-c337-4845-a6f3-474223153543
             partitioner:
         query: "\n        SELECT\n            customer_id\n        FROM analytics.dim_customers\n\
           \    "
       supplier_shipments_quality:
         type: query
-        id: f7579e7c-9024-4ed8-a1cd-55ffc852ba42
+        id: 734e48b7-a0be-453a-9b06-4470e3f5c86e
         batch_metadata: {}
         batch_definitions:
           all_delivered_shipments:
-            id: c076f619-854e-4f43-8c88-a4dfdf80de77
+            id: da18bd27-9663-4908-9223-4468112c1e3d
             partitioner:
         query: "\n        SELECT\n            shipment_id,\n            shipment_status,\n\
           \            actual_delivery_date\n        FROM analytics.fact_supplier_shipments\n\
@@ -142,4 +143,4 @@ fluent_datasources:
     connection_string: 
       postgresql+psycopg2://governance:governance_dev@localhost:5433/governance
 analytics_enabled:
-data_context_id: f54a2788-de2f-4aa4-beb1-27d4e8107ac8
+data_context_id: 6f2abbcf-357d-4a75-8693-23b634271f26

@@ -1,19 +1,19 @@
 {
   "expectations": [
     {
-      "id": "3ebf5031-c5ab-4c85-9a8c-e288c186c99a",
+      "id": "113fb5c8-6ba0-4ac9-8683-d4726f9891f9",
       "kwargs": {
-        "column": "actual_delivery_date"
+        "column": "order_delivered_customer_at"
       },
       "meta": {},
       "severity": "critical",
       "type": "expect_column_values_to_not_be_null"
     }
   ],
-  "id": "17189179-50ab-41a1-a554-8c0f6ab15d57",
+  "id": "7c8da0fa-6379-41a1-b4bc-a5f8e5725518",
   "meta": {
     "great_expectations_version": "1.24.1"
   },
-  "name": "fact_supplier_shipments_quality",
+  "name": "delivered_orders_quality",
   "notes": null
 }

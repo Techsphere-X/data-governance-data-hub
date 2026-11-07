@@ -1,11 +1,11 @@
 {
   "actions": [],
-  "id": "199dfebf-a501-48b8-8b70-a5222ea7a902",
+  "id": "e729cecd-3fe6-4c67-bd01-fff0ce741af3",
   "name": "fact_orders_business_checkpoint",
   "result_format": "SUMMARY",
   "validation_definitions": [
     {
-      "id": "2f73a647-369f-448b-b805-148ddd8d2433",
+      "id": "37a5546e-5272-4dfb-8d11-5f95e8342da6",
       "name": "fact_orders_business_validation"
     }
   ]

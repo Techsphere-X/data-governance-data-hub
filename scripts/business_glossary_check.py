@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Read-only DataHub business glossary governance checker.
+DataHub business glossary governance checker with optional assertion publishing.
 
 Checks:
 - Glossary term validity
@@ -13,9 +13,11 @@ Checks:
 - Consistent column glossary usage
 - Glossary definition completeness
 
-The checker does not modify DataHub metadata.
+By default, the checker is read-only. Use --publish to publish rule
+definitions and their latest results as DataHub custom assertions.
 """
 
+import argparse
 import sys
 from pathlib import Path
 from collections import defaultdict
@@ -23,6 +25,7 @@ from collections import defaultdict
 import yaml
 
 from scripts.governance.datahub_client import DataHubClient
+from scripts.governance.assertion_publisher import AssertionPublisher
 from scripts.governance.business_glossary_helpers import (
     get_dataset_glossary_metadata,
     get_glossary_catalog,
@@ -383,13 +386,37 @@ def check_glossary_definitions(config, catalog):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Validate DataHub business glossary governance rules."
+    )
+
+    publish_group = parser.add_mutually_exclusive_group()
+
+    publish_group.add_argument(
+        "--publish",
+        action="store_true",
+        help="Publish/update custom assertions and their latest results in DataHub.",
+    )
+
+    publish_group.add_argument(
+        "--no-publish",
+        action="store_true",
+        help="Run checks without publishing assertions (default).",
+    )
+
+    args = parser.parse_args()
+
+    should_publish = args.publish
 
     try:
         config = load_rules()
 
         client = DataHubClient()
 
+        publisher = AssertionPublisher(client) if should_publish else None
+
         models = config["models"]
+
         enabled_checks = config.get("checks") or {}
 
         catalog = get_glossary_catalog(client)
@@ -412,6 +439,15 @@ def main():
     assertion_passed = 0
     assertion_failed = 0
 
+    publish_errors = []
+    publish_count = 0
+    publish_target_urn = None
+
+    if should_publish:
+        print("Assertion publishing: ENABLED")
+    else:
+        print("Assertion publishing: DISABLED (use --publish to enable)")
+
     # ----------------------------------------------
     # Check each configured model
     # ----------------------------------------------
@@ -431,11 +467,18 @@ def main():
                 catalog,
             )
 
+            entity_urn = metadata.get("urn")
+
+            if entity_urn and publish_target_urn is None:
+                publish_target_urn = entity_urn
+
         except Exception as error:
             failed_models.append(model_name)
+
             model_results[model_name] = {}
 
             print(f"FAIL | {model_name} | {error}")
+
             continue
 
         model_failed = False
@@ -454,12 +497,47 @@ def main():
 
             elif status == "FAIL":
                 assertion_failed += 1
+
                 model_failed = True
+
+            # --------------------------------------
+            # Publish model-level assertion
+            # --------------------------------------
+
+            if should_publish:
+
+                entity_urn = metadata.get("urn")
+
+                if not entity_urn:
+                    publish_errors.append(
+                        f"{model_name}/{rule_name}: dataset URN missing from metadata"
+                    )
+
+                else:
+                    try:
+                        publisher.publish(
+                            entity_urn=entity_urn,
+                            model_name=model_name,
+                            rule_key=rule_name,
+                            description=(
+                                f"Business glossary governance rule: {rule_name}. "
+                                f"Latest checker detail: {result['details']}"
+                            ),
+                            passed=(status == "PASS"),
+                        )
+
+                        publish_count += 1
+
+                    except Exception as publish_error:
+                        publish_errors.append(
+                            f"{model_name}/{rule_name}: {publish_error}"
+                        )
 
         model_results[model_name] = results
 
         if model_failed:
             failed_models.append(model_name)
+
         else:
             passed_models.append(model_name)
 
@@ -476,14 +554,47 @@ def main():
         "glossary_definition_completeness",
         False,
     ):
+
         definition_status = definition_result["status"]
 
         rule_totals["glossary_definition_completeness"][definition_status] += 1
 
         if definition_status == "PASS":
             assertion_passed += 1
+
         else:
             assertion_failed += 1
+
+        # This is one global check, so publish it once and associate it with
+        # the first dataset whose metadata was successfully retrieved.
+
+        if should_publish:
+
+            if not publish_target_urn:
+                publish_errors.append(
+                    "glossary_definition_completeness: no dataset URN available "
+                    "for the global assertion"
+                )
+
+            else:
+                try:
+                    publisher.publish(
+                        entity_urn=publish_target_urn,
+                        model_name="global_glossary",
+                        rule_key="glossary_definition_completeness",
+                        description=(
+                            "Global business glossary definition completeness check. "
+                            f"Latest checker detail: {definition_result['details']}"
+                        ),
+                        passed=(definition_status == "PASS"),
+                    )
+
+                    publish_count += 1
+
+                except Exception as publish_error:
+                    publish_errors.append(
+                        f"global_glossary/glossary_definition_completeness: {publish_error}"
+                    )
 
     # ----------------------------------------------
     # Final report
@@ -503,6 +614,7 @@ def main():
     print("\nRULE RESULTS")
 
     for rule_name, counts in rule_totals.items():
+
         print(f"{rule_name}: " f"{counts['PASS']} passed, " f"{counts['FAIL']} failed")
 
     # ----------------------------------------------
@@ -510,30 +622,58 @@ def main():
     # ----------------------------------------------
 
     if failed_models:
+
         print("\nFAILED MODELS")
 
         for model_name in failed_models:
+
             print(f"\n{model_name}")
 
             results = model_results.get(model_name, {})
 
             for rule_name, result in results.items():
+
                 if result["status"] == "FAIL":
+
                     print(f"  FAIL | {rule_name} | " f"{result['details']}")
 
             if not results:
                 print("  Dataset could not be checked.")
 
         if definition_result["status"] == "FAIL":
+
             print("\nGlossary definitions: " + definition_result["details"])
 
     elif definition_result["status"] == "FAIL":
+
         print("\nGlossary definitions: " + definition_result["details"])
 
     else:
+
         print("\nAll enabled glossary checks passed.")
 
+    # ----------------------------------------------
+    # Publishing report
+    # ----------------------------------------------
+
+    if should_publish:
+
+        print("\nASSERTION PUBLISHING SUMMARY")
+
+        print(f"Assertions published/updated: {publish_count}")
+
+    if publish_errors:
+
+        print("\nASSERTION PUBLISHING ERRORS")
+
+        for error in publish_errors:
+
+            print(f"  ERROR | {error}")
+
     print("-" * 42)
+
+    if publish_errors:
+        return 2
 
     return 1 if failed_models or assertion_failed > 0 else 0
 

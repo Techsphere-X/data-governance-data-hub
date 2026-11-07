@@ -1,22 +1,22 @@
 {
   "data": {
     "asset": {
-      "id": "2b8369bb-69ab-4522-85d1-30af0faccca1",
+      "id": "6e370662-4e6b-47d5-97c9-8e92cc29daeb",
       "name": "dim_customers_quality"
     },
     "batch_definition": {
-      "id": "60869c65-f9b9-455b-8a40-5274d0f1adee",
+      "id": "3b2c4fc8-c337-4845-a6f3-474223153543",
       "name": "all_dim_customers"
     },
     "datasource": {
-      "id": "38ce0641-5ca7-45a6-91d7-6c3839aa59ee",
+      "id": "f3cd3f10-883c-4cc6-b3bc-d498ac2ef23b",
       "name": "olist_postgres"
     }
   },
-  "id": "ff534fef-1d67-4e9a-8bb5-aeb9d930d35a",
+  "id": "3976c153-834a-4bf7-bb67-a43c100ef7b2",
   "name": "dim_customers_validation",
   "suite": {
-    "id": "dbf58952-7939-40bd-bbf9-3b330e917705",
+    "id": "2fdb00d9-79f7-448f-9a76-094ebfcf5383",
     "name": "dim_customers_quality"
   }
 }
